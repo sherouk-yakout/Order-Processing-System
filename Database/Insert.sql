@@ -48,3 +48,8 @@ INSERT INTO Order_items (order_id, isbn, qty, unit_price) VALUES
 (1, '1111111111111', 2, 450.00),
 (1, '3333333333333', 1, 200.00),
 (2, '2222222222222', 1, 380.00);
+
+INSERT INTO Publisher_orders
+(isbn, pub_id, qty, `status`)
+VALUES
+('4444444444444', 3, 50, 'pending');
