@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Signup - Bookstore</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<script src="js/main.js"></script>
+<script src="js/auth.js"></script>
+</body>
+<body class="light-theme">
+  <nav class="navbar">
+    <a href="index.html" class="logo">📚 Bookstore</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+  </nav>
+
+  <main class="container">
+    <div class="auth-wrapper">
+      <div class="form-toggle">
+        <button id="loginTab" class="btn primary-btn active">Login</button>
+        <button id="signupTab" class="btn secondary-btn">Sign Up</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="auth-form">
+        <h2>🔐 Login</h2>
+        <input type="email" placeholder="Email" id="loginEmail" required />
+        <input type="password" placeholder="Password" id="loginPassword" required />
+        <button type="submit" class="primary-btn">Login</button>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="signupForm" class="auth-form hidden">
+        <h2>📝 Sign Up</h2>
+        <input type="text" placeholder="Full Name" id="signupName" required />
+        <input type="email" placeholder="Email" id="signupEmail" required />
+        <input type="password" placeholder="Password" id="signupPassword" required />
+        <button type="submit" class="primary-btn">Create Account</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Bookstore Auth</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

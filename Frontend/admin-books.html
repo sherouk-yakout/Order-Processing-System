@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Manage Books</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <script src="js/main.js"></script>
+  <body>
+    <nav class="navbar">
+      <a href="index.html" class="logo">📚 Bookstore</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="admin-dashboard.html">Admin</a></li>
+        <li><a href="customer-dashboard.html">Customer</a></li>
+      </ul>
+    </nav>
+
+    <nav class="navbar">
+      <a href="admin-dashboard.html" class="logo">Books Management</a>
+    </nav>
+
+    <main class="container">
+      <h2>📚 Add or Update Books</h2>
+      <form id="bookForm">
+        <input type="text" placeholder="Book Title" required />
+        <input type="text" placeholder="Author" required />
+        <input type="number" placeholder="Price" required />
+        <input type="number" placeholder="Stock" required />
+        <button class="btn primary-btn">Save Book</button>
+      </form>
+
+      <h3>Existing Books</h3>
+      <div id="bookList"></div>
+    </main>
+
+    <footer class="footer">
+      <p>© 2025 Admin Books</p>
+    </footer>
+  </body>
+</html>

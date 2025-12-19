@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Manage Orders</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <script src="js/main.js"></script>
+  <body>
+    <nav class="navbar">
+      <a href="index.html" class="logo">📚 Bookstore</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="admin-dashboard.html">Admin</a></li>
+        <li><a href="customer-dashboard.html">Customer</a></li>
+      </ul>
+    </nav>
+
+    <nav class="navbar">
+      <a href="admin-dashboard.html" class="logo">Orders Management</a>
+    </nav>
+
+    <main class="container">
+      <h2>📦 All Orders</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Status</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="orderList"></tbody>
+      </table>
+    </main>
+
+    <footer class="footer">© 2025 Admin Orders</footer>
+  </body>
+</html>
