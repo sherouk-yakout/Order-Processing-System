@@ -37,7 +37,7 @@ CREATE TABLE Users(
     email VARCHAR(255) NOT NULL UNIQUE,
     phone VARCHAR(20) NOT NULL,
     shipping_address VARCHAR(255) NOT NULL,
-    `role` VARCHAR(10) NOT NULL
+    `role` ENUM('Admin','Customer') NOT NULL
 );
 CREATE TABLE Carts(
     cart_id INT AUTO_INCREMENT PRIMARY KEY, 
