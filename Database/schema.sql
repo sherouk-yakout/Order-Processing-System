@@ -10,7 +10,7 @@ CREATE TABLE Publishers(
 CREATE TABLE Books (
     isbn VARCHAR(13) PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
-    category ENUM('Science','Art','Religion','History','Geography') NOT NULL
+    category ENUM('Science','Art','Religion','History','Geography') NOT NULL,
     publish_year YEAR,
     price DECIMAL(10,2) NOT NULL,
     stock INT NOT NULL,
