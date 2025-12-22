@@ -293,3 +293,32 @@ form button {
   background: var(--primary);
   color: white;
 }
+/* ====== EXTRA PROFESSIONAL STYLES ====== */
+
+.stock-ok {
+  color: green;
+  font-weight: 600;
+}
+
+.stock-out {
+  color: red;
+  font-weight: 600;
+}
+
+#emptyCartMsg {
+  margin-top: 1em;
+  font-style: italic;
+  color: gray;
+}
+
+.report-box p {
+  margin: 0.6em 0;
+  font-size: 1.05rem;
+}
+.book-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}

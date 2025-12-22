@@ -4,28 +4,26 @@
     <title>Your Cart</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
-  <script src="js/main.js"></script>
-  <body>
+
+  <body class="light-theme">
     <nav class="navbar">
       <a href="index.html" class="logo">📚 Bookstore</a>
       <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-        <li><a href="customer-dashboard.html">Customer</a></li>
-      </ul>
-    </nav>
+      <button class="btn secondary-btn back-btn">⬅ Back</button>
 
-    <nav class="navbar">
-      <a href="customer-dashboard.html" class="logo">Your Cart</a>
     </nav>
 
     <main class="container">
-      <h2>🛒 Cart Items</h2>
+      <h2>🛒 Your Cart</h2>
+
       <ul id="cartList"></ul>
+      <p id="emptyCartMsg">Your cart is empty 🛒</p>
+
       <button class="primary-btn">Checkout</button>
     </main>
 
     <footer class="footer">© 2025 Cart</footer>
+
+    <script src="js/main.js"></script>
   </body>
 </html>

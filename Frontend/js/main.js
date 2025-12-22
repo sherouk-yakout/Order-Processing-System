@@ -1,41 +1,61 @@
-// Simple book search
-const books = [
-  { title: "Clean Code", available: true },
-  { title: "The Pragmatic Programmer", available: true },
-  { title: "1984", available: false }
-];
 document.addEventListener("DOMContentLoaded", () => {
+
+  /* ===== BACK BUTTON ===== */
+  document.querySelectorAll(".back-btn").forEach(btn =>
+    btn.onclick = () => history.back()
+  );
+
+  /* ===== THEME TOGGLE ===== */
   const toggle = document.getElementById("themeToggle");
-  const body = document.body;
-
-  body.classList.add("light-theme");
-
-  toggle.addEventListener("click", () => {
-    body.classList.toggle("dark-theme");
-    body.classList.toggle("light-theme");
-
-    toggle.textContent = body.classList.contains("dark-theme")
-      ? "☀️ Light Mode"
-      : "🌙 Dark Mode";
-  });
-});
-document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.getElementById("searchInput");
-  const searchResults = document.getElementById("searchResults");
-
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      const query = searchInput.value.toLowerCase();
-      const results = books.filter(b =>
-        b.title.toLowerCase().includes(query)
-      );
-
-      searchResults.innerHTML = results.map(b => `
-        <div class="card">
-          <h4>${b.title}</h4>
-          <p>${b.available ? "In Stock" : "Out of Stock"}</p>
-        </div>
-      `).join("");
-    });
+  if (toggle) {
+    toggle.onclick = () => {
+      document.body.classList.toggle("dark-theme");
+      toggle.textContent =
+        document.body.classList.contains("dark-theme")
+          ? "☀️ Light Mode"
+          : "🌙 Dark Mode";
+    };
   }
+
+  /* ===== ROLE PROTECTION ===== */
+  const role = sessionStorage.getItem("role");
+  const page = location.pathname;
+
+  if (page.includes("admin") && role !== "admin") {
+    alert("Access denied ❌");
+    location.href = "index.html";
+  }
+
+  if (page.includes("customer") && role !== "customer") {
+    alert("Access denied ❌");
+    location.href = "index.html";
+  }
+
+  /* ===== LOGOUT ===== */
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      sessionStorage.clear();
+      location.href = "index.html";
+    };
+  }
+
+  /* ===== SESSION TIMEOUT ===== */
+  let timer;
+  const LIMIT = 5 * 60 * 1000;
+
+  function resetTimer() {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      alert("Session expired ⏱");
+      sessionStorage.clear();
+      location.href = "index.html";
+    }, LIMIT);
+  }
+
+  ["click", "mousemove", "keydown"].forEach(e =>
+    document.addEventListener(e, resetTimer)
+  );
+
+  resetTimer();
 });
