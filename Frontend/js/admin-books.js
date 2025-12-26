@@ -74,7 +74,7 @@ async function addBook(e) {
     const res = await fetch(API_BOOKS, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isbn, title, category, publish_year, price, stock, threshold,publisher })
+      body: JSON.stringify({ isbn, title, category, publish_year, price, stock, threshold,publisher,authors: author })
     });
 
     const raw = await res.text();
@@ -110,12 +110,14 @@ async function saveEdit(e) {
   const stock = Number(val("edit_stock") || 0);
   const threshold = Number(val("edit_threshold") || 0);
   const pub_id = Number(val("edit_pub_id") || 0);
+  const publisher = val("edit_publisher");
+   const author = val("edit_authors");
 
   try {
     const res = await fetch(`${API_BOOKS}/${encodeURIComponent(isbn)}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, category, publish_year, price, stock, threshold, publisher})
+      body: JSON.stringify({ title, category, publish_year, price, stock, threshold, publisher, authors: author})
     });
 
     const raw = await res.text();
