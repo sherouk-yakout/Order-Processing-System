@@ -23,9 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadReplenishmentOrders();
 });
 
-/* ============================
-      LOAD ORDERS
-============================ */
 async function loadReplenishmentOrders() {
   const res = await fetch(ORDERS_API);
   allOrders = await res.json();
@@ -33,9 +30,6 @@ async function loadReplenishmentOrders() {
   renderOrders(allOrders);
 }
 
-/* ============================
-      RENDER ORDERS
-============================ */
 async function renderOrders(orders) {
   const container = document.getElementById("ordersContainer");
   container.innerHTML = "";
@@ -93,10 +87,6 @@ async function renderOrders(orders) {
     `;
   }
 }
-
-/* ============================
-      EXPAND / COLLAPSE
-============================ */
 function toggleOrder(id) {
   const box = document.getElementById(`items-${id}`);
   const arrow = document.getElementById(`arrow-${id}`);
@@ -104,10 +94,6 @@ function toggleOrder(id) {
   box.classList.toggle("hidden");
   arrow.textContent = box.classList.contains("hidden") ? "▼" : "▲";
 }
-
-/* ============================
-      CONFIRM ORDER
-============================ */
 async function confirmOrder(orderId) {
   if (!confirm("Confirm this replenishment order?")) return;
 
@@ -124,10 +110,6 @@ async function confirmOrder(orderId) {
     alert(data.error || "Error confirming order ❌");
   }
 }
-
-/* ============================
-        FILTER BUTTONS
-============================ */
 function filterOrders(type) {
   if (type === "all") return renderOrders(allOrders);
 

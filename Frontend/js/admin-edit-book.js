@@ -62,7 +62,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-/* helpers */
 function val(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : "";
