@@ -1,4 +1,6 @@
-const API = "http://localhost:3000/books";
+const API_BASE = "http://localhost:3000";
+const API_BOOKS = `${API_BASE}/books`;
+const API_CART_ADD = `${API_BASE}/cart/add`;
 
 let debounceTimer;
 
@@ -8,23 +10,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   input.addEventListener("input", () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(searchBooks, 300); // Smooth typing
+    debounceTimer = setTimeout(searchBooks, 300);
   });
 
   category.addEventListener("change", searchBooks);
 
-  searchBooks(); // Load all books initially
+  searchBooks(); // load all initially
 });
 
 /* === Fetch Google Books Thumbnail === */
 async function getBookImage(isbn) {
   try {
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`
     );
     const data = await res.json();
 
-    if (data.items && data.items[0].volumeInfo.imageLinks) {
+    if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
       return data.items[0].volumeInfo.imageLinks.thumbnail;
     }
   } catch (err) {
@@ -36,32 +38,50 @@ async function getBookImage(isbn) {
 
 /* === Main search function === */
 async function searchBooks() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  const category = document.getElementById("categoryFilter").value;
+  const query = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+  const categoryValue = document.getElementById("categoryFilter").value || "";
 
   const skeleton = document.getElementById("loadingSkeleton");
   const output = document.getElementById("searchResults");
 
-  // Show loading skeletons
+  // skeleton
   skeleton.innerHTML = "";
   output.innerHTML = "";
   skeleton.classList.remove("hidden");
-  for (let i = 0; i < 6; i++) {
-    skeleton.innerHTML += `<div class="skeleton-card"></div>`;
+  for (let i = 0; i < 6; i++) skeleton.innerHTML += `<div class="skeleton-card"></div>`;
+
+  let books = [];
+  try {
+    const res = await fetch(API_BOOKS);
+    const raw = await res.text();
+    let data = [];
+    try { data = JSON.parse(raw); } catch {}
+
+    if (!res.ok) {
+      throw new Error((data && data.error) ? data.error : raw || "Books API failed");
+    }
+
+    books = Array.isArray(data) ? data : [];
+  } catch (err) {
+    skeleton.classList.add("hidden");
+    output.innerHTML = `<p style="color:red;">Error loading books: ${err.message}</p>`;
+    console.error("BOOKS LOAD ERROR:", err);
+    return;
   }
 
-  const res = await fetch(API);
-  const books = await res.json();
+  const filtered = books.filter((book) => {
+    const title = (book.title || "").toLowerCase();
+    const author = (book.author || "").toLowerCase();      // backend: author
+    const isbn = (book.isbn || "").toLowerCase();
+    const publisher = (book.publisher || "").toLowerCase();
 
-  const filtered = books.filter(book => {
     const matchesText =
-      book.title.toLowerCase().includes(query) ||
-      book.authors.toLowerCase().includes(query) ||
-      book.isbn.toLowerCase().includes(query) ||
-      book.publisher.toLowerCase().includes(query);
+      title.includes(query) ||
+      author.includes(query) ||
+      isbn.includes(query) ||
+      publisher.includes(query);
 
-    const matchesCategory = category === "" || book.category === category;
-
+    const matchesCategory = categoryValue === "" || book.category === categoryValue;
     return matchesText && matchesCategory;
   });
 
@@ -73,28 +93,31 @@ async function searchBooks() {
   }
 
   for (const book of filtered) {
-    const stockClass = book.stock > 0 ? "stock-ok" : "stock-out";
-    const stockText = book.stock > 0 ? "In Stock" : "Out of Stock";
+    const stock = Number(book.stock || 0);
+    const stockClass = stock > 0 ? "stock-ok" : "stock-out";
+    const stockText = stock > 0 ? "In Stock" : "Out of Stock";
 
     const imageUrl = await getBookImage(book.isbn);
+    const year = (book.publish_year ?? "—");
+    const price = Number(book.price || 0).toFixed(2);
 
     output.innerHTML += `
       <div class="card book-card fade-in">
         <img src="${imageUrl}" class="book-cover" />
 
         <div class="book-info">
-          <h3>${book.title}</h3>
-          <p><strong>Authors:</strong> ${book.authors}</p>
-          <p><strong>Publisher:</strong> ${book.publisher}</p>
-          <p><strong>Year:</strong> ${book.year}</p>
-          <p><strong>Category:</strong> ${book.category}</p>
-          <p><strong>ISBN:</strong> ${book.isbn}</p>
-          <p><strong>Price:</strong> $${book.price}</p>
+          <h3>${book.title || "Untitled"}</h3>
+          <p><strong>Author:</strong> ${book.author || "—"}</p>
+          <p><strong>Publisher:</strong> ${book.publisher || "—"}</p>
+          <p><strong>Year:</strong> ${year}</p>
+          <p><strong>Category:</strong> ${book.category || "—"}</p>
+          <p><strong>ISBN:</strong> ${book.isbn || "—"}</p>
+          <p><strong>Price:</strong> $${price}</p>
           <p class="${stockClass}">${stockText}</p>
 
           <button class="primary-btn"
-            onclick="addToCart(${book.id})"
-            ${book.stock === 0 ? "disabled" : ""}>
+            onclick="addToCart('${book.isbn}', ${price})"
+            ${stock === 0 ? "disabled" : ""}>
             🛒 Add to Cart
           </button>
         </div>
@@ -103,21 +126,40 @@ async function searchBooks() {
   }
 }
 
-/* === Add to cart === */
-async function addToCart(bookId) {
-  const user_id = localStorage.getItem("user_id");
+/* === Add to cart ===
+   Backend expects: POST /cart/add { cart_id, isbn, qty, price }
+*/
+async function addToCart(isbn, price) {
+  const cart_id = localStorage.getItem("cart_id");
 
-  const res = await fetch("http://localhost:3000/cart", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id, book_id: bookId, quantity: 1 }),
-  });
+  if (!cart_id) {
+    alert("Missing cart_id. Please login again.");
+    return;
+  }
 
-  const data = await res.json();
+  try {
+    const res = await fetch(API_CART_ADD, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cart_id,
+        isbn,
+        qty: 1,
+        price: Number(price)
+      }),
+    });
 
-  if (res.ok) {
-    alert("Book added to cart ✔️");
-  } else {
-    alert(data.error || "Cannot add to cart ❌");
+    const raw = await res.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
+
+    if (res.ok) {
+      alert("Item added to cart ✔️");
+    } else {
+      alert(data.error || raw || "Cannot add to cart ❌");
+    }
+  } catch (err) {
+    console.error("CART ERROR:", err);
+    alert("Cannot add to cart ❌");
   }
 }

@@ -3,7 +3,11 @@
 <head>
   <title>Search Books</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="js/main.js"></script>
+
+  <!-- ✅ defer main.js -->
+  <script src="js/main.js" defer></script>
+
+  <!-- ✅ your page logic -->
   <script src="js/customer-search.js" defer></script>
 </head>
 
@@ -20,7 +24,7 @@
 
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search by title, author, ISBN, publisher…">
-      
+
       <select id="categoryFilter">
         <option value="">All Categories</option>
         <option>Fiction</option>
@@ -30,7 +34,6 @@
         <option>Kids</option>
         <option>Comics</option>
       </select>
-
     </div>
 
     <!-- Loading skeleton -->
