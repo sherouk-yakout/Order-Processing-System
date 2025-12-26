@@ -43,7 +43,7 @@ CREATE TABLE Carts(
     cart_id INT AUTO_INCREMENT PRIMARY KEY, 
     customer_username VARCHAR(50) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('active','checked_out','abandoned') NOT NULL,
+    `status` ENUM('active','checked_out','abandoned') NOT NULL,
     FOREIGN KEY (customer_username) REFERENCES Users(username) ON UPDATE CASCADE
 );
 CREATE TABLE Cart_items(
@@ -60,7 +60,7 @@ CREATE TABLE Customer_orders(
     customer_username VARCHAR(50) NOT NULL,
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(10,2) NOT NULL,
-    status ENUM('pending','paid','cancelled') NOT NULL DEFAULT 'paid',
+    `status` ENUM('pending','paid','cancelled') NOT NULL DEFAULT 'paid',
     FOREIGN KEY (customer_username) REFERENCES Users(username) ON UPDATE CASCADE
 );
 CREATE TABLE Order_items(
@@ -77,7 +77,7 @@ CREATE TABLE Publisher_orders(
     isbn VARCHAR(13) NOT NULL,
     pub_id INT NOT NULL,
     qty INT NOT NULL,
-    status ENUM('pending','confirmed','received','cancelled') NOT NULL DEFAULT 'pending',
+    `status` ENUM('pending','confirmed','received','cancelled') NOT NULL DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     confirmed_at DATETIME,
     FOREIGN KEY (isbn) REFERENCES Books(isbn),
