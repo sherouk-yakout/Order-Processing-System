@@ -2,62 +2,69 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// Get all books OR search books (Admin & Customer)
 router.get('/', async (req, res) => {
-    const { isbn, title, category, author, publisher } = req.query;
+  const { isbn, title, category, author, publisher } = req.query;
 
-    let sql = `
-        SELECT DISTINCT
-            b.isbn,
-            b.title,
-            b.category,
-            b.publish_year,
-            b.price,
-            b.stock,
-            p.pub_name AS publisher,
-            a.author_name AS author
-        FROM Books b
-        JOIN Publishers p ON b.pub_id = p.pub_id
-        LEFT JOIN Book_authors ba ON b.isbn = ba.isbn
-        LEFT JOIN Authors a ON ba.author_id = a.author_id
-        WHERE 1=1
-    `;
+  let sql = `
+    SELECT
+      b.isbn,
+      b.title,
+      b.category,
+      b.publish_year,
+      b.price,
+      b.stock,
+      p.pub_name AS publisher,
+      COALESCE(GROUP_CONCAT(DISTINCT a.author_name ORDER BY a.author_name SEPARATOR ', '), '') AS author
+    FROM Books b
+    JOIN Publishers p ON b.pub_id = p.pub_id
+    LEFT JOIN Book_authors ba ON b.isbn = ba.isbn
+    LEFT JOIN Authors a ON ba.author_id = a.author_id
+    WHERE 1=1
+  `;
 
-    const params = [];
+  const params = [];
+  const having = [];
+  const havingParams = [];
 
-    if (isbn) {
-        sql += ' AND b.isbn = ?';
-        params.push(isbn);
-    }
+  if (isbn) {
+    sql += ' AND b.isbn = ?';
+    params.push(isbn);
+  }
+  if (title) {
+    sql += ' AND b.title LIKE ?';
+    params.push(`%${title}%`);
+  }
+  if (category) {
+    sql += ' AND b.category = ?';
+    params.push(category);
+  }
+  if (publisher) {
+    sql += ' AND p.pub_name LIKE ?';
+    params.push(`%${publisher}%`);
+  }
 
-    if (title) {
-        sql += ' AND b.title LIKE ?';
-        params.push(`%${title}%`);
-    }
+  // aggregate => filter in HAVING
+  if (author) {
+    having.push('author LIKE ?');
+    havingParams.push(`%${author}%`);
+  }
 
-    if (category) {
-        sql += ' AND b.category = ?';
-        params.push(category);
-    }
+  sql += `
+    GROUP BY
+      b.isbn, b.title, b.category, b.publish_year, b.price, b.stock, p.pub_name
+  `;
 
-    if (author) {
-        sql += ' AND a.author_name LIKE ?';
-        params.push(`%${author}%`);
-    }
+  if (having.length) {
+    sql += ` HAVING ${having.join(' AND ')}`;
+  }
 
-    if (publisher) {
-        sql += ' AND p.pub_name LIKE ?';
-        params.push(`%${publisher}%`);
-    }
-
-    try {
-        const [rows] = await pool.execute(sql, params);
-        res.json(rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const [rows] = await pool.execute(sql, [...params, ...havingParams]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
-
 
 // Add new book (Admin only)
 router.post('/', async (req, res) => {

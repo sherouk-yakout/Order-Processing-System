@@ -41,6 +41,7 @@ async function searchBooks() {
   skeleton.innerHTML = "";
   output.innerHTML = "";
   skeleton.classList.remove("hidden");
+  skeleton.style.display = "grid";
   for (let i = 0; i < 6; i++)
     skeleton.innerHTML += `<div class="skeleton-card"></div>`;
 
@@ -62,6 +63,7 @@ async function searchBooks() {
     books = Array.isArray(data) ? data : [];
   } catch (err) {
     skeleton.classList.add("hidden");
+    skeleton.style.display = "none";
     output.innerHTML = `<p style="color:red;">Error loading books: ${err.message}</p>`;
     console.error("BOOKS LOAD ERROR:", err);
     return;
