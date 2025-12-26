@@ -51,7 +51,12 @@ async function loadCart() {
         <div class="card fade-in">
           <h3>${escapeHtml(title)}</h3>
           <p><strong>ISBN:</strong> ${escapeHtml(isbn)}</p>
-          <p><strong>Qty:</strong> ${qty}</p>
+          <p><strong>Qty:</strong></p>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateQty('${escapeAttr(isbn)}', -1)">−</button>
+            <span class="qty-value">${qty}</span>
+            <button class="qty-btn" onclick="updateQty('${escapeAttr(isbn)}', 1)">+</button>
+          </div>
           <p><strong>Unit Price:</strong> $${price.toFixed(2)}</p>
           <p><strong>Subtotal:</strong> $${(qty * price).toFixed(2)}</p>
           <button class="btn secondary-btn" onclick="removeItem('${escapeAttr(isbn)}')">Remove</button>
@@ -133,14 +138,38 @@ async function checkout() {
     alert(`Checkout successful ✔️ Order ID: ${data.order_id}`);
     closeCheckout();
 
-    // Refresh cart (it gets cleared on backend)
     loadCart();
   } catch (e) {
     alert(e.message);
   }
 }
+async function updateQty(isbn, delta) {
+  const cart_id = localStorage.getItem("cart_id");
+  if (!cart_id) return alert("Missing cart_id. Please login again.");
 
-/* helpers */
+  try {
+    const res = await fetch(`${API_BASE}/cart/qty`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cart_id,
+        isbn,
+        delta: Number(delta)
+      })
+    });
+
+    const raw = await res.text();
+    let data = [];
+    try { data = JSON.parse(raw); } catch {}
+
+    if (!res.ok) throw new Error(data?.error || raw || "Qty update failed");
+
+    loadCart();
+  } catch (err) {
+    console.error("Qty update failed", err);
+    alert(err.message);
+  }
+}
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
 }
