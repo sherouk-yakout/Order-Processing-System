@@ -1,75 +1,94 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Admin - Books</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/main.js"></script>
-  <script src="js/admin-books.js" defer></script>
-</head>
+  <head>
+    <title>Admin - Books</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js"></script>
+    <script src="js/admin-books.js" defer></script>
+  </head>
 
-<body onload="requireAuth('admin')">
+  <body onload="requireAuth('admin')">
+    <nav class="navbar">
+      <a href="admin-dashboard.html" class="logo">📚 Admin Panel</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
+    </nav>
 
-  <nav class="navbar">
-    <a href="admin-dashboard.html" class="logo">📚 Admin Panel</a>
-    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-    <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
-  </nav>
+    <main class="container fade-in">
+      <h2>📘 Manage Books</h2>
 
-  <main class="container fade-in">
-   
-    <h2>📘 Manage Books</h2>
+      <section class="card form-card">
+        <h3 id="formTitle">Add New Book</h3>
 
-    <section class="card form-card">
-      <h3 id="formTitle">Add New Book</h3>
-      
-      <form id="bookForm">
-        <input type="hidden" id="bookId">
+        <form id="bookForm">
+          <input type="hidden" id="bookId" />
 
-        <div class="form-grid">
-          <input type="text" id="isbn" placeholder="ISBN" required>
-          <input type="text" id="title" placeholder="Title" required>
-          <input type="text" id="authors" placeholder="Authors" required>
-          <input type="text" id="publisher" placeholder="Publisher" required>
-          <input type="number" id="year" placeholder="Year" required>
-          <input type="text" id="category" placeholder="Category" required>
+          <div class="form-grid">
+            <input type="text" id="isbn" placeholder="ISBN" required />
+            <input type="text" id="title" placeholder="Title" required />
+            <input type="text" id="authors" placeholder="Authors" required />
+            <input
+              type="text"
+              id="publisher"
+              placeholder="Publisher"
+              required
+            />
+            <input type="number" id="year" placeholder="Year" required />
+            <select id="category" required>
+              <option value="">Select Category</option>
+              <option value="Science">Science</option>
+              <option value="Art">Art</option>
+              <option value="Religion">Religion</option>
+              <option value="History">History</option>
+              <option value="Geography">Geography</option>
+            </select>
 
-          <input type="number" id="price" step="0.01" placeholder="Price" required>
-          <input type="number" id="stock" placeholder="Stock" required>
-          <input type="number" id="threshold" placeholder="Threshold" required>
-        </div>
+            <input
+              type="number"
+              id="price"
+              step="0.01"
+              placeholder="Price"
+              required
+            />
+            <input type="number" id="stock" placeholder="Stock" required />
+            <input
+              type="number"
+              id="threshold"
+              placeholder="Threshold"
+              required
+            />
+          </div>
 
-        <img id="coverPreview" class="cover-preview hidden" />
+          <img id="coverPreview" class="cover-preview hidden" />
 
-        <button class="btn primary-btn" type="submit">💾 Save Book</button>
-      </form>
-    </section>
+          <button class="btn primary-btn" type="submit">💾 Save Book</button>
+        </form>
+      </section>
 
+      <section class="card">
+        <h3>📚 Books Inventory</h3>
 
-    <section class="card">
-      <h3>📚 Books Inventory</h3>
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Cover</th>
+              <th>ISBN</th>
+              <th>Title</th>
+              <th>Authors</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Threshold</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookList"></tbody>
+        </table>
+      </section>
+    </main>
 
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>Cover</th>
-            <th>ISBN</th>
-            <th>Title</th>
-            <th>Authors</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Threshold</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="bookList"></tbody>
-      </table>
-    </section>
-
-  </main>
-
-  <footer class="footer">© 2025 Admin Books</footer>
-  <script>
+    <footer class="footer">© 2025 Admin Books</footer>
+    <script>
       document
         .getElementById("logoutBtn")
         ?.addEventListener("click", function (e) {
@@ -82,5 +101,5 @@
           window.location.href = "./login.html";
         });
     </script>
-</body>
+  </body>
 </html>
