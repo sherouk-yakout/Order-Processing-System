@@ -3,34 +3,30 @@ const API_BASE = window.API_BASE || "http://localhost:3000";
 document.addEventListener("DOMContentLoaded", () => {
   loadProfile();
 
-  const form = document.getElementById("profileForm");
+  const form = document.getElementById("accountForm");
   if (form) form.addEventListener("submit", saveProfile);
 });
 
 async function loadProfile() {
   const user_id = localStorage.getItem("user_id");
-  const out = document.getElementById("profileMsg");
+  const out = document.getElementById("accountMsg");
   if (!user_id) return setMsg(out, "Missing user_id. Login again.", true);
 
   try {
     const res = await fetch(`${API_BASE}/customers/${encodeURIComponent(user_id)}`);
-    const raw = await res.text();
-    let data = {};
-    try { data = JSON.parse(raw); } catch {}
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Failed to load profile");
 
-    if (!res.ok) throw new Error(data.error || raw || "Failed to load profile");
-
-    // IDs must match your HTML inputs:
-    setVal("first_name", data.first_name);
-    setVal("last_name", data.last_name);
+    setVal("firstName", data.first_name);
+    setVal("lastName", data.last_name);
     setVal("username", data.username);
     setVal("email", data.email);
     setVal("phone", data.phone);
-    setVal("shipping_address", data.shipping_address);
+    setVal("address", data.shipping_address);
 
-    setMsg(out, "Profile loaded ✔️", false);
+    setMsg(out, "", false);
   } catch (e) {
-    setMsg(out, e.message, true);
+    setMsg(document.getElementById("accountMsg"), e.message, true);
   }
 }
 
@@ -38,18 +34,22 @@ async function saveProfile(e) {
   e.preventDefault();
 
   const old_user_id = localStorage.getItem("user_id");
-  const out = document.getElementById("profileMsg");
+  const out = document.getElementById("accountMsg");
   if (!old_user_id) return setMsg(out, "Missing user_id. Login again.", true);
 
+  // Backend expects these field names:
   const payload = {
-    first_name: val("first_name"),
-    last_name: val("last_name"),
+    first_name: val("firstName"),
+    last_name: val("lastName"),
     username: val("username"),
     email: val("email"),
     phone: val("phone"),
-    shipping_address: val("shipping_address"),
-    password: val("password") // optional
+    shipping_address: val("address"),
+    password: val("newPassword") // optional
   };
+
+  // If password is empty, delete it so backend doesn’t update it
+  if (!payload.password) delete payload.password;
 
   try {
     const res = await fetch(`${API_BASE}/customers/update/${encodeURIComponent(old_user_id)}`, {
@@ -58,27 +58,24 @@ async function saveProfile(e) {
       body: JSON.stringify(payload)
     });
 
-    const raw = await res.text();
-    let data = {};
-    try { data = JSON.parse(raw); } catch {}
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Update failed");
 
-    if (!res.ok) throw new Error(data.error || raw || "Update failed");
-
-    // if username changed, update localStorage
+    // If username changed, keep localStorage in sync
     if (payload.username && payload.username !== old_user_id) {
       localStorage.setItem("user_id", payload.username);
+      localStorage.setItem("username", payload.username);
     }
 
-    // clear password field
-    setVal("password", "");
+    // Clear password input after save
+    setVal("newPassword", "");
 
     setMsg(out, "Profile updated ✔️", false);
-  } catch (e2) {
-    setMsg(out, e2.message, true);
+  } catch (err) {
+    setMsg(out, err.message, true);
   }
 }
 
-/* helpers */
 function val(id) { return (document.getElementById(id)?.value || "").trim(); }
 function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v ?? ""; }
 function setMsg(el, msg, isErr) {
