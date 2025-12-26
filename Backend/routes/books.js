@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const REORDER_QTY = 50; 
+
 
 router.get('/', async (req, res) => {
   const { isbn, title, category, author, publisher } = req.query;
@@ -145,50 +147,92 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 // Update book (Admin)
 router.put('/:isbn', async (req, res) => {
   const { isbn } = req.params;
-  const { title, category, publish_year, price, stock, threshold, publisher,authors} = req.body;
+  const { title, category, publish_year, price, stock, threshold, publisher, authors } = req.body;
 
   try {
-    // Check if publisher exists
-    const [pubRows] = await pool.execute('SELECT pub_id FROM Publishers WHERE pub_name = ?', [publisher]);
-    let pub_id;
+    if (stock !== undefined && stock < 0) {
+      return res.status(400).json({ error: "Stock cannot be negative" });
+    }
 
+    const [oldBookRows] = await pool.execute(
+      `SELECT stock, threshold, pub_id FROM Books WHERE isbn = ?`,
+      [isbn]
+    );
+
+    if (oldBookRows.length === 0) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    const oldStock = oldBookRows[0].stock;
+    const oldThreshold = oldBookRows[0].threshold;
+    const oldPubId = oldBookRows[0].pub_id;
+
+    const [pubRows] = await pool.execute(
+      'SELECT pub_id FROM Publishers WHERE pub_name = ?',
+      [publisher]
+    );
+
+    let pub_id;
     if (pubRows.length > 0) {
       pub_id = pubRows[0].pub_id;
     } else {
-      const [result] = await pool.execute('INSERT INTO Publishers(pub_name) VALUES (?)', [publisher]);
+      const [result] = await pool.execute(
+        'INSERT INTO Publishers(pub_name) VALUES (?)',
+        [publisher]
+      );
       pub_id = result.insertId;
     }
-    // Handle authors
+
     const authorNames = authors.split(',').map(a => a.trim()).filter(a => a);
     const authorIds = [];
+
     for (const name of authorNames) {
-      const [authRows] = await pool.execute('SELECT author_id FROM Authors WHERE author_name = ?', [name]);
+      const [authRows] = await pool.execute(
+        'SELECT author_id FROM Authors WHERE author_name = ?',
+        [name]
+      );
+
       let author_id;
       if (authRows.length > 0) {
         author_id = authRows[0].author_id;
       } else {
-        const [result] = await pool.execute('INSERT INTO Authors(author_name) VALUES (?)', [name]);
+        const [result] = await pool.execute(
+          'INSERT INTO Authors(author_name) VALUES (?)',
+          [name]
+        );
         author_id = result.insertId;
       }
       authorIds.push(author_id);
     }
-    // Update book
+
     await pool.execute(
-      'UPDATE Books SET title=?, category=?, publish_year=?, price=?, stock=?, threshold=?, pub_id=? WHERE isbn=?',
+      `UPDATE Books
+       SET title=?, category=?, publish_year=?, price=?, stock=?, threshold=?, pub_id=?
+       WHERE isbn=?`,
       [title, category, publish_year, price, stock, threshold, pub_id, isbn]
     );
-    // Remove old authors
+
     await pool.execute('DELETE FROM Book_authors WHERE isbn = ?', [isbn]);
-    // Add new authors
     for (const author_id of authorIds) {
-      await pool.execute('INSERT INTO Book_authors(isbn, author_id) VALUES (?, ?)', [isbn, author_id]);
+      await pool.execute(
+        'INSERT INTO Book_authors(isbn, author_id) VALUES (?, ?)',
+        [isbn, author_id]
+      );
     }
+
+    if (oldStock > oldThreshold && stock < oldThreshold) {
+      await pool.execute(
+        `INSERT INTO Publisher_orders (isbn, pub_id, qty, status)
+         VALUES (?, ?, ?, 'pending')`,
+        [isbn, pub_id, REORDER_QTY]
+      );
+    }
+
     res.json({ message: 'Book updated successfully' });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
