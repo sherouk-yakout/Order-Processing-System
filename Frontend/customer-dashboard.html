@@ -65,18 +65,29 @@
     </main>
 
     <footer class="footer">© 2025 Customer Dashboard</footer>
-    <script>
-      document
-        .getElementById("logoutBtn")
-        ?.addEventListener("click", function (e) {
-          e.preventDefault();
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
 
-          localStorage.removeItem("user_id");
-          localStorage.removeItem("username");
-          localStorage.removeItem("role");
+    const cart_id = localStorage.getItem("cart_id");
 
-          window.location.href = "./login.html";
-        });
-    </script>
+    //  CLEAR CART IN DATABASE
+    if (cart_id) {
+      await fetch(`http://localhost:3000/cart/clear/${cart_id}`, {
+        method: "DELETE"
+      });
+    }
+
+    //  CLEAR SESSION
+    localStorage.removeItem("cart_id");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+
+    window.location.href = "login.html";
+  });
+</script>
+
+
   </body>
 </html>

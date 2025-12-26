@@ -29,6 +29,13 @@ function showToast(message, type = "success") {
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+//  Clear any previous session before new login
+localStorage.removeItem("user_id");
+localStorage.removeItem("username");
+localStorage.removeItem("role");
+localStorage.removeItem("cart_id");
+
+
     const loginData = {
         email: document.getElementById("loginEmail").value.trim(),
         password: document.getElementById("loginPassword").value.trim(),
@@ -43,15 +50,25 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
         const data = await res.json().catch(() => ({}));
 
-        if (res.ok) {
-            const role = (data.role || "").toLowerCase();
+       if (res.ok) {
+    const role = (data.role || "").toLowerCase();
 
-            localStorage.setItem("user_id", data.user_id);
-            localStorage.setItem("username", data.user_id);
-            localStorage.setItem("role", role);
-            localStorage.setItem("cart_id", data.cart_id);
+    //  Store session info
+    localStorage.setItem("user_id", data.user_id);
+    localStorage.setItem("username", data.user_id);
+    localStorage.setItem("role", role);
 
-            showToast("Login successful ✔️", "success");
+    //  IMPORTANT: store NEW cart_id returned from backend
+    if (!data.cart_id) {
+        throw new Error("Login failed: cart not created");
+    }
+
+    if (!localStorage.getItem("cart_id")) {
+  localStorage.setItem("cart_id", data.cart_id);
+}
+
+
+    showToast("Login successful ✔️", "success");
 
             setTimeout(() => {
                 if (role === "admin") {

@@ -26,22 +26,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("customerName").textContent = userName;
 
   if (!userId) {
-    console.warn("Missing user_id. Redirecting to login.");
     window.location.href = "./login.html";
     return;
   }
 
+  loadCartCount();       
   loadStats(userId);
   loadRecommendations(userId);
 });
 
+
 async function loadStats(userId) {
   try {
-    const cartRes = await fetch(`${CART_API}/${userId}`);
-    const cartData = await cartRes.json();
-    document.getElementById("cartCount").textContent =
-      Array.isArray(cartData) ? cartData.length : 0;
-
     const orderRes = await fetch(`${ORDER_API}/user/${userId}`);
     const orderData = await orderRes.json();
     document.getElementById("orderCount").textContent =
@@ -143,4 +139,77 @@ async function loadRecommendations(userId) {
     recBox.innerHTML = "<p>Could not load recommendations.</p>";
   }
 }
+async function loadCartCount() {
+  const cartId = localStorage.getItem("cart_id");
+  const cartCountEl = document.getElementById("cartCount");
 
+  if (!cartCountEl) return;
+
+  if (!cartId) {
+    cartCountEl.textContent = "0";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/cart/${encodeURIComponent(cartId)}`);
+    const items = await res.json();
+
+    if (!Array.isArray(items)) {
+      cartCountEl.textContent = "0";
+      return;
+    }
+
+    //  SUM quantities (same logic as cart page)
+    const totalItems = items.reduce(
+      (sum, item) => sum + Number(item.qty || 0),
+      0
+    );
+
+    cartCountEl.textContent = totalItems;
+  } catch (err) {
+    console.error("Cart count error:", err);
+    cartCountEl.textContent = "0";
+  }
+}
+window.addEventListener("storage", (e) => {
+  if (e.key === "cart_id") {
+    loadCartCount();
+  }
+});
+
+async function loadCartCount() {
+  const cart_id = localStorage.getItem("cart_id");
+  const el = document.getElementById("cartCount");
+
+  if (!el) return;
+
+  if (!cart_id) {
+    el.textContent = "0";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/cart/${cart_id}`);
+    const items = await res.json();
+
+    let totalQty = 0;
+    if (Array.isArray(items)) {
+      for (const item of items) {
+        totalQty += Number(item.qty || 0);
+      }
+    }
+
+    el.textContent = totalQty;
+  } catch (err) {
+    console.error(err);
+    el.textContent = "0";
+  }
+}
+window.addEventListener("focus", () => {
+  loadCartCount();
+});
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    loadCartCount();
+  }
+});

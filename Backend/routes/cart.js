@@ -22,6 +22,21 @@ router.post("/add", async (req, res) => {
   }
 });
 
+// Clear cart (for logout)
+router.delete('/clear/:cart_id', async (req, res) => {
+  const { cart_id } = req.params;
+  try {
+    await pool.execute(
+      'DELETE FROM Cart_items WHERE cart_id = ?',
+      [cart_id]
+    );
+    res.json({ message: 'Cart cleared successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // View cart
 router.get('/:cart_id', async (req, res) => {
     const { cart_id } = req.params;
