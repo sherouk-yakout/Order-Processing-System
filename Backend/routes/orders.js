@@ -127,48 +127,49 @@ router.post("/checkout", async (req, res) => {
 });
 
 // Confirm replenishment order (Admin)
-router.put("/confirm/:orderId", async (req, res) => {
-  const { orderId } = req.params;
-  const conn = await pool.getConnection();
+router.put('/confirm/:id', async (req, res) => {
+  const repOrderId = req.params.id;
 
+  const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
-    const [orderRows] = await conn.execute(
-      `SELECT isbn, pub_id, qty, status
+    const [rows] = await conn.execute(
+      `SELECT rep_order_id, isbn, qty, status
        FROM Publisher_orders
-       WHERE order_id = ? FOR UPDATE`,
-      [orderId]
+       WHERE rep_order_id = ?`,
+      [repOrderId]
     );
 
-    if (orderRows.length === 0) {
+    if (rows.length === 0) {
       await conn.rollback();
       return res.status(404).json({ error: "Order not found" });
     }
 
-    const order = orderRows[0];
-
-    if (order.status === "confirmed") {
+    if (rows[0].status !== 'pending') {
       await conn.rollback();
       return res.status(400).json({ error: "Order already confirmed" });
     }
 
+    const { isbn, qty } = rows[0];
+
     await conn.execute(
       `UPDATE Publisher_orders
-       SET status = 'confirmed'
-       WHERE order_id = ?`,
-      [orderId]
+       SET status='confirmed', confirmed_at=NOW()
+       WHERE rep_order_id=?`,
+      [repOrderId]
     );
 
     await conn.execute(
       `UPDATE Books
        SET stock = stock + ?
        WHERE isbn = ?`,
-      [order.qty, order.isbn]
+      [qty, isbn]
     );
 
     await conn.commit();
     res.json({ message: "Order confirmed and stock updated" });
+
   } catch (err) {
     await conn.rollback();
     res.status(500).json({ error: err.message });
@@ -200,7 +201,6 @@ router.get('/user/:customer_username', async (req, res) => {
       [customer_username]
     );
 
-    // GROUP ROWS INTO ORDERS
     const ordersMap = {};
 
     for (const row of rows) {
