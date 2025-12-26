@@ -44,7 +44,7 @@ CREATE TABLE Carts(
     customer_username VARCHAR(50) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     `status` VARCHAR(15) NOT NULL,
-    FOREIGN KEY (customer_username) REFERENCES Users(username)
+    FOREIGN KEY (customer_username) REFERENCES Users(username) ON UPDATE CASCADE
 );
 CREATE TABLE Cart_items(
     cart_id INT,
@@ -60,7 +60,7 @@ CREATE TABLE Customer_orders(
     customer_username VARCHAR(50) NOT NULL,
     order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     total_amount DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (customer_username) REFERENCES Users(username)
+    FOREIGN KEY (customer_username) REFERENCES Users(username) ON UPDATE CASCADE
 );
 CREATE TABLE Order_items(
     order_id INT,
