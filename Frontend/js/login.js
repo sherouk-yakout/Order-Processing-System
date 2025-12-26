@@ -1,10 +1,37 @@
+// SHOW / HIDE PASSWORD (EYE ICON)
+document.querySelectorAll(".toggle-eye").forEach(eye => {
+    eye.addEventListener("click", () => {
+        const targetId = eye.getAttribute("data-target");
+        const input = document.getElementById(targetId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            eye.textContent = "🙈";
+        } else {
+            input.type = "password";
+            eye.textContent = "👁";
+        }
+    });
+});
+
+// TOAST NOTIFICATION
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+
+    setTimeout(() => {
+        toast.className = "toast";
+    }, 3000);
+}
+
+// LOGIN FORM SUBMIT
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Backend expects: { email, password }
     const loginData = {
-        email: document.getElementById("loginEmail")?.value.trim(),
-        password: document.getElementById("loginPassword")?.value.trim(),
+        email: document.getElementById("loginEmail").value.trim(),
+        password: document.getElementById("loginPassword").value.trim(),
     };
 
     try {
@@ -17,28 +44,28 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
         const data = await res.json().catch(() => ({}));
 
         if (res.ok) {
-            // Backend returns: { message, user_id, role }
             const role = (data.role || "").toLowerCase();
 
-            // In this project, we use user_id (username) as the session key
             localStorage.setItem("user_id", data.user_id);
             localStorage.setItem("username", data.user_id);
             localStorage.setItem("role", role);
             localStorage.setItem("cart_id", data.cart_id);
 
+            showToast("Login successful ✔️", "success");
 
-            alert("Login successful ✔️");
+            setTimeout(() => {
+                if (role === "admin") {
+                    window.location.href = "admin-dashboard.html";
+                } else {
+                    window.location.href = "customer-dashboard.html";
+                }
+            }, 1200);
 
-            if (role === "admin") {
-                window.location.href = "admin-dashboard.html";
-            } else {
-                window.location.href = "customer-dashboard.html";
-            }
         } else {
-            alert(data.error || "Login failed ❌");
+            showToast(data.error || "Login failed ❌", "error");
         }
     } catch (err) {
         console.error(err);
-        alert("Cannot reach backend. Make sure Backend is running on http://localhost:3000 ❌");
+        showToast("Backend server not reachable ❌", "error");
     }
 });

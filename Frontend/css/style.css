@@ -731,3 +731,32 @@ input:focus, select:focus {
   text-align: center;
   font-weight: bold;
 }
+.toast {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  min-width: 260px;
+  padding: 15px 20px;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: all 0.4s ease;
+  z-index: 9999;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.success {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
