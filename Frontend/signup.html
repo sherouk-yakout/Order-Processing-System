@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - Bookstore</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js" defer></script>
+    <script src="js/signup.js" defer></script>
+  </head>
+
+  <body class="light-theme">
+    <nav class="navbar">
+      <a href="index.html" class="logo">📚 Bookstore</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    </nav>
+
+    <main class="container auth-center">
+      <div class="auth-wrapper glass card fade-in">
+        <h2>📝 Create Account</h2>
+
+        <form id="signupForm" class="auth-form">
+          <input
+            type="text"
+            id="signupUsername"
+            placeholder="Username"
+            required
+          />
+          <input
+            type="text"
+            id="signupFirstName"
+            placeholder="First Name"
+            required
+          />
+          <input
+            type="text"
+            id="signupLastName"
+            placeholder="Last Name"
+            required
+          />
+          <input type="email" id="signupEmail" placeholder="Email" required />
+          <input
+            type="text"
+            id="signupPhone"
+            placeholder="Phone Number"
+            required
+          />
+
+          <textarea
+            id="signupAddress"
+            placeholder="Shipping Address"
+            required
+          ></textarea>
+
+          <div class="password-field">
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Password"
+              required
+            />
+            <span class="toggle-eye" data-target="signupPassword">👁</span>
+          </div>
+
+          <button class="btn primary-btn">Create Account</button>
+
+          <p class="subtext">
+            Already have an account?
+            <a href="login.html">Login</a>
+          </p>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">© 2025 Bookstore</footer>
+    <script src="js/main.js"></script>
+    <script src="js/signup.js"></script>
+  </body>
+</html>

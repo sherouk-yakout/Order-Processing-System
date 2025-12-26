@@ -1,42 +1,71 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Customer Dashboard</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<head>
+  <title>Customer Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
   <script src="js/main.js"></script>
-  <body>
-    <nav class="navbar">
-      <a href="index.html" class="logo">📚 Bookstore</a>
-      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <button id="logoutBtn" class="btn secondary-btn">🚪 Logout</button>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-        <li><a href="customer-dashboard.html">Customer</a></li>
-      </ul>
-    </nav>
+  <script src="js/customer-dashboard.js" defer></script>
+</head>
 
-    <nav class="navbar">
-      <a href="#" class="logo">Customer Panel</a>
-      <ul class="nav-links">
-        <li><a href="customer-search.html">Search Books</a></li>
-        <li><a href="customer-cart.html">Cart</a></li>
-        <li><a href="customer-orders.html">Orders</a></li>
-        <li><a href="customer-account.html">Account</a></li>
-      </ul>
-    </nav>
+<body onload="requireAuth('customer')">
 
-    <main class="dashboard-main">
-      <h1>👋 Welcome Back!</h1>
-      <div class="grid-cards">
-        <a href="customer-search.html" class="card">🔍 Search Books</a>
-        <a href="customer-cart.html" class="card">🛒 Your Cart</a>
-        <a href="customer-orders.html" class="card">📦 Your Orders</a>
-        <a href="customer-account.html" class="card">👤 Account Info</a>
+  <!-- HEADER / NAV -->
+  <nav class="navbar">
+    <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <ul class="nav-links">
+      <li><a href="customer-search.html">Search</a></li>
+      <li><a href="customer-cart.html">Cart</a></li>
+      <li><a href="customer-orders.html">Orders</a></li>
+    </ul>
+  </nav>
+
+  <main class="container fade-in">
+
+    <!-- WELCOME BANNER -->
+    <section class="banner-card">
+      <h2>👋 Welcome, <span id="customerName"></span></h2>
+      <p>Your personal bookstore dashboard.</p>
+    </section>
+
+    <!-- QUICK STATS -->
+    <section class="grid-3 mt-30">
+
+      <div class="card stat-card">
+        <h3 id="cartCount">0</h3>
+        <p>Items in Cart</p>
       </div>
-    </main>
 
-    <footer class="footer">© 2025 Customer Panel</footer>
-  </body>
+      <div class="card stat-card">
+        <h3 id="orderCount">0</h3>
+        <p>Your Orders</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="categoryCount">0</h3>
+        <p>Categories Available</p>
+      </div>
+
+    </section>
+
+    <!-- QUICK ACTION BUTTONS -->
+    <section class="quick-actions mt-40">
+      <a href="customer-search.html" class="btn primary-btn">🔍 Search Books</a>
+      <a href="customer-cart.html" class="btn primary-btn">🛒 View Cart</a>
+      <a href="customer-orders.html" class="btn primary-btn">📦 Your Orders</a>
+    </section>
+
+    <!-- RECOMMENDATIONS -->
+    <section class="mt-50">
+      <h2>🌟 Recommended For You</h2>
+      <p class="subtext">Based on your preferred categories</p>
+
+      <div id="recommendedContainer" class="recommend-grid"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">© 2025 Customer Dashboard</footer>
+
+</body>
 </html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Bookstore</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js" defer></script>
+    <script src="js/login.js" defer></script>
+  </head>
+
+  <body class="light-theme">
+    <nav class="navbar">
+      <a href="index.html" class="logo">📚 Bookstore</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    </nav>
+
+    <main class="container auth-center">
+      <div class="auth-wrapper glass card fade-in">
+        <h2>🔐 Login</h2>
+
+        <form id="loginForm" class="auth-form">
+          <input
+            type="text"
+            id="loginUsername"
+            placeholder="Username"
+            required
+          />
+
+          <div class="password-field">
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Password"
+              required
+            />
+            <span class="toggle-eye" data-target="loginPassword">👁</span>
+          </div>
+
+          <button class="btn primary-btn">Login</button>
+
+          <p class="subtext">
+            Don’t have an account?
+            <a href="signup.html">Create one</a>
+          </p>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">© 2025 Bookstore</footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/login.js"></script>
+  </body>
+</html>

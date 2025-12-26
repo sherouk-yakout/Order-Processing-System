@@ -17,38 +17,24 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  /* ===== ROLE PROTECTION ===== */
-  const role = sessionStorage.getItem("role");
-  const page = location.pathname;
-
-  if (page.includes("admin") && role !== "admin") {
-    alert("Access denied ❌");
-    location.href = "index.html";
-  }
-
-  if (page.includes("customer") && role !== "customer") {
-    alert("Access denied ❌");
-    location.href = "index.html";
-  }
-
   /* ===== LOGOUT ===== */
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.onclick = () => {
-      sessionStorage.clear();
+      localStorage.clear(); // <--- unified auth storage
       location.href = "index.html";
     };
   }
 
   /* ===== SESSION TIMEOUT ===== */
   let timer;
-  const LIMIT = 5 * 60 * 1000;
+  const LIMIT = 5 * 60 * 1000; // 5 minutes
 
   function resetTimer() {
     clearTimeout(timer);
     timer = setTimeout(() => {
       alert("Session expired ⏱");
-      sessionStorage.clear();
+      localStorage.clear();
       location.href = "index.html";
     }, LIMIT);
   }
@@ -59,3 +45,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   resetTimer();
 });
+
+
+window.requireAuth = function(role = null) {
+
+  const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem("role");
+
+  if (!token) {
+    window.location.href = "auth.html";
+    return;
+  }
+
+  if (role && role !== userRole) {
+    alert("Unauthorized access ❌");
+    window.location.href = "index.html";
+  }
+};

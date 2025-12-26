@@ -1,45 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Search Books</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<head>
+  <title>Search Books</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/main.js"></script>
+  <script src="js/customer-search.js" defer></script>
+</head>
 
-  <body class="light-theme">
-    <nav class="navbar">
-      <a href="index.html" class="logo">📚 Bookstore</a>
-      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-        <li><a href="customer-dashboard.html">Customer</a></li>
-      </ul>
-    </nav>
+<body onload="requireAuth('customer')">
 
-    <main class="container">
-      <h2>🔍 Search Books</h2>
+  <nav class="navbar">
+    <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+  </nav>
 
-      <!-- CATEGORY FILTER -->
+  <main class="container fade-in">
+
+    <h2>🔍 Search Books</h2>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by title, author, ISBN, publisher…">
+      
       <select id="categoryFilter">
         <option value="">All Categories</option>
+        <option>Fiction</option>
         <option>Science</option>
-        <option>Art</option>
-        <option>Religion</option>
-        <option>History</option>
-        <option>Geography</option>
+        <option>Technology</option>
+        <option>Business</option>
+        <option>Kids</option>
+        <option>Comics</option>
       </select>
 
-      <input
-        type="text"
-        id="searchInput"
-        placeholder="Search by book title..."
-      />
+    </div>
 
-      <div id="searchResults"></div>
-    </main>
+    <!-- Loading skeleton -->
+    <div id="loadingSkeleton" class="skeleton-grid hidden"></div>
 
-    <footer class="footer">© 2025 Search Books</footer>
+    <!-- Results -->
+    <div id="searchResults" class="search-grid"></div>
 
-    <script src="js/main.js"></script>
-  </body>
+  </main>
+
+  <footer class="footer">© 2025 Bookstore</footer>
+
+</body>
 </html>

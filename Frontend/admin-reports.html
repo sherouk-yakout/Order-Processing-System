@@ -1,35 +1,82 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Reports</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<head>
+  <title>Admin Reports</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/main.js"></script>
 
-  <body class="light-theme">
-    <nav class="navbar">
-      <a href="index.html" class="logo">📚 Bookstore</a>
-      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <button class="btn secondary-btn back-btn">⬅ Back</button>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-      </ul>
-    </nav>
+  <script src="js/admin-reports.js" defer></script>
+</head>
 
-    <main class="container">
-      <h2>📈 Sales Reports</h2>
+<body onload="requireAuth('admin')">
 
-      <div class="report-box">
-        <p>📅 Sales Today: <strong>$1,200</strong></p>
-        <p>📆 Last Month Sales: <strong>$12,450</strong></p>
-        <p>🏆 Top Selling Book: <strong>Clean Code</strong></p>
-        <p>👤 Top Customer: <strong>Ahmed Ali</strong></p>
-      </div>
-    </main>
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="logo">📊 Admin Reports</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+  </nav>
 
-    <footer class="footer">© 2025 Admin Reports</footer>
+  <main class="container fade-in">
 
-    <script src="js/main.js"></script>
-  </body>
+    <h2>📈 Analytics & Reports</h2>
+
+    <!-- STATS CARDS -->
+    <section class="grid-4 mt-30">
+      <div class="card stat-card" id="statLastMonth">Loading...</div>
+      <div class="card stat-card" id="statOrdersMonth">Loading...</div>
+      <div class="card stat-card" id="statAvgOrder">Loading...</div>
+      <div class="card stat-card" id="statTopCategory">Loading...</div>
+    </section>
+
+    <!-- MONTHLY SALES CHART -->
+    <section class="card mt-40">
+      <h3>📉 Monthly Sales</h3>
+      <canvas id="chartMonthlySales"></canvas>
+    </section>
+
+    <!-- TOP BOOKS CHART -->
+    <section class="card mt-40">
+      <h3>🏆 Top 10 Best-Selling Books</h3>
+      <canvas id="chartTopBooks"></canvas>
+    </section>
+
+    <!-- TOP CUSTOMERS -->
+    <section class="card mt-40">
+      <h3>👑 Top 5 Customers</h3>
+      <div id="topCustomers"></div>
+    </section>
+
+    <!-- SALES ON SPECIFIC DATE -->
+    <section class="card mt-40">
+      <h3>📅 Sales on a Specific Date</h3>
+
+      <input type="date" id="specificDate">
+      <button class="btn primary-btn" onclick="getSalesOnDate()">Search</button>
+
+      <div id="salesOnDate" class="mt-20"></div>
+    </section>
+
+    <!-- TOP BOOKS TABLE -->
+    <section class="card mt-40">
+      <h3>📚 Top Books Table</h3>
+      <div id="topBooks"></div>
+    </section>
+
+    <!-- BOOK ORDER COUNT -->
+    <section class="card mt-40">
+      <h3>🔢 How Many Times Was a Book Ordered?</h3>
+
+      <input type="text" id="bookTitleSearch" placeholder="Enter book title">
+      <button class="btn primary-btn" onclick="getBookOrderCount()">Check</button>
+
+      <div id="bookOrderCount" class="mt-20"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">© 2025 Admin Reports</footer>
+
+</body>
 </html>

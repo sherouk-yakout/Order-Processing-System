@@ -1,44 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Admin Dashboard</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
   <script src="js/main.js"></script>
-  <body>
-    <nav class="navbar">
-      <a href="index.html" class="logo">📚 Bookstore</a>
-      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <button id="logoutBtn" class="btn secondary-btn">🚪 Logout</button>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-        <li><a href="customer-dashboard.html">Customer</a></li>
-      </ul>
-    </nav>
 
-    <nav class="navbar">
-      <a href="#" class="logo">Admin Panel</a>
-      <ul class="nav-links">
-        <li><a href="admin-books.html">Books</a></li>
-        <li><a href="admin-orders.html">Orders</a></li>
-        <li><a href="admin-reports.html">Reports</a></li>
-      </ul>
-    </nav>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <main class="dashboard-main">
-      <h1>📊 Admin Dashboard</h1>
-      <div class="grid-cards">
-        <a href="admin-books.html" class="card">📘 Manage Books</a>
-        <a href="admin-orders.html" class="card">📦 Manage Orders</a>
-        <a href="admin-reports.html" class="card">📈 Reports</a>
+  <script src="js/admin-dashboard.js" defer></script>
+</head>
+
+<body onload="requireAuth('admin')">
+
+  <nav class="navbar">
+    <a class="logo" href="admin-dashboard.html">📊 Admin Dashboard</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <ul class="nav-links">
+      <li><a href="admin-books.html">Books</a></li>
+      <li><a href="admin-orders.html">Replenishment Orders</a></li>
+      <li><a href="admin-reports.html">Reports</a></li>
+    </ul>
+  </nav>
+
+  <main class="container fade-in">
+
+    <!-- WELCOME -->
+    <section class="banner-card">
+      <h2>👋 Welcome, <span id="adminName"></span></h2>
+      <p>Here is the latest store performance overview.</p>
+    </section>
+
+    <!-- QUICK STATS -->
+    <section class="grid-3 mt-30">
+
+      <div class="card stat-card">
+        <h3 id="bookCount">0</h3>
+        <p>Total Books</p>
       </div>
-    </main>
 
-    <footer class="footer">
-      <p>© 2025 Admin Panel</p>
-    </footer>
-  </body>
+      <div class="card stat-card">
+        <h3 id="outOfStockCount">0</h3>
+        <p>Out of Stock</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="customerCount">0</h3>
+        <p>Total Customers</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="orderCount">0</h3>
+        <p>Total Orders</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="pendingReplenishCount">0</h3>
+        <p>Pending Replenishments</p>
+      </div>
+
+      <div class="card stat-card">
+        <h3 id="totalSales">0</h3>
+        <p>Total Sales ($)</p>
+      </div>
+
+    </section>
+
+    <!-- MONTHLY SALES CHART -->
+    <section class="mt-50">
+      <h2>📈 Monthly Sales</h2>
+      <canvas id="salesChart" height="120"></canvas>
+    </section>
+
+    <!-- TOP CATEGORIES -->
+    <section class="mt-50">
+      <h2>🏆 Top Categories</h2>
+      <div id="topCategories"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">© 2025 Admin Dashboard</footer>
+
+</body>
 </html>

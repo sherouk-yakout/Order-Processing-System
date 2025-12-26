@@ -1,36 +1,84 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Account Info</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account</title>
+
+  <link rel="stylesheet" href="css/style.css" />
   <script src="js/main.js"></script>
-  <body>
-    <nav class="navbar">
-      <a href="index.html" class="logo">📚 Bookstore</a>
-      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-        <li><a href="customer-dashboard.html">Customer</a></li>
-      </ul>
-    </nav>
+  <script src="js/customer-account.js" defer></script>
 
-    <nav class="navbar">
-      <a href="customer-dashboard.html" class="logo">Account Info</a>
-    </nav>
+  <style>
+    /* Center the card */
+    .account-wrapper {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
 
-    <main class="container">
-      <h2>👤 My Profile</h2>
-      <form id="accountForm">
-        <input type="text" placeholder="Full Name" />
-        <input type="email" placeholder="Email" />
-        <button class="primary-btn">Save Changes</button>
-        <button class="btn secondary-btn back-btn">⬅ Back</button>
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 25px;
+    }
+    .dark-theme .glass {
+      background: rgba(40, 40, 40, 0.6);
+    }
+
+    .account-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .section-title {
+      margin-top: 25px;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <a href="customer-dashboard.html" class="logo">📚 My Account</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <ul class="nav-links">
+      <li><a href="customer-dashboard.html">Dashboard</a></li>
+      <li><a href="customer-orders.html">My Orders</a></li>
+      <li><a href="customer-cart.html">Cart</a></li>
+    </ul>
+  </nav>
+
+  <main class="container fade-in">
+    <div class="account-wrapper glass card">
+
+      <h2>👤 Profile Information</h2>
+
+      <form id="accountForm" class="account-form">
+        
+        <label class="section-title">Personal Details</label>
+
+        <input type="text" id="firstName" placeholder="First Name" required />
+        <input type="text" id="lastName" placeholder="Last Name" required />
+        <input type="text" id="username" placeholder="Username" required />
+
+        <label class="section-title">Contact Information</label>
+
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="phone" placeholder="Phone Number" required />
+        <textarea id="address" placeholder="Shipping Address" required></textarea>
+
+        <button class="btn primary-btn">Save Changes ✔️</button>
+        <button type="button" class="btn secondary-btn back-btn">⬅ Back</button>
 
       </form>
-    </main>
 
-    <footer class="footer">© 2025 Account</footer>
-  </body>
+    </div>
+  </main>
+
+  <footer class="footer">© 2025 Bookstore</footer>
+</body>
 </html>

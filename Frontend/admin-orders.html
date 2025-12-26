@@ -1,40 +1,40 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Manage Orders</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<head>
+  <title>Admin - Replenishment Orders</title>
+  <link rel="stylesheet" href="css/style.css">
   <script src="js/main.js"></script>
-  <body>
-    <nav class="navbar">
-      <a href="index.html" class="logo">📚 Bookstore</a>
-      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="admin-dashboard.html">Admin</a></li>
-        <li><a href="customer-dashboard.html">Customer</a></li>
-      </ul>
-    </nav>
+  <script src="js/admin-orders.js" defer></script>
+</head>
 
-    <nav class="navbar">
-      <a href="admin-dashboard.html" class="logo">Orders Management</a>
-    </nav>
+<body onload="requireAuth('admin')">
 
-    <main class="container">
-      <h2>📦 All Orders</h2>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Status</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody id="orderList"></tbody>
-      </table>
-    </main>
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="logo">📦 Replenishment Orders</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
 
-    <footer class="footer">© 2025 Admin Orders</footer>
-  </body>
+    <ul class="nav-links">
+      <li><a href="admin-books.html">Books</a></li>
+      <li><a href="admin-reports.html">Reports</a></li>
+    </ul>
+  </nav>
+
+  <main class="container fade-in">
+
+    <h2>📦 Replenishment Orders</h2>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <button class="btn small-btn" onclick="filterOrders('all')">All</button>
+      <button class="btn small-btn" onclick="filterOrders('pending')">Pending</button>
+      <button class="btn small-btn" onclick="filterOrders('completed')">Completed</button>
+    </div>
+
+    <div id="ordersContainer" class="orders-grid"></div>
+
+  </main>
+
+  <footer class="footer">© 2025 Admin Orders</footer>
+
+</body>
 </html>
