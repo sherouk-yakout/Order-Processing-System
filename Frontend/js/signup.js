@@ -85,8 +85,9 @@ document.getElementById("signupForm")?.addEventListener("submit", async (e) => {
         const data = await res.json().catch(() => ({}));
 
         if (res.ok) {
-            alert("Account created successfully ✔️");
-            window.location.href = "login.html";
+            window.location.href = "signup-success.html";
+
+            
         } else {
             alert(data.error || "Signup failed ❌");
         }

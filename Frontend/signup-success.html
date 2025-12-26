@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Account Created</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    .success-container {
+      min-height: 85vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .success-card {
+      max-width: 500px;
+      width: 100%;
+      padding: 40px;
+      border-radius: 18px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px var(--shadow);
+      animation: fadeIn 0.6s ease;
+    }
+
+    body.dark-theme .success-card {
+      background: rgba(40, 40, 40, 0.55);
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 15px;
+    }
+
+    .success-title {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .success-text {
+      opacity: 0.85;
+      margin-bottom: 30px;
+    }
+
+    .success-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">📚 Bookstore</a>
+  </nav>
+
+  <main class="container success-container">
+    <div class="success-card">
+      <div class="success-icon">✅</div>
+      <h2 class="success-title">Account Created Successfully!</h2>
+      <p class="success-text">
+        Your account has been created. You can now log in and start shopping.
+      </p>
+
+      <div class="success-actions">
+        <a href="login.html" class="btn primary-btn">Login Now</a>
+        <a href="index.html" class="btn secondary-btn">Go to Home</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">© 2025 Bookstore</footer>
+</body>
+</html>
