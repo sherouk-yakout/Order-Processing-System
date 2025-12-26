@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// a) Total sales for previous month
 router.get('/sales/previous-month', async (req, res) => {
     try {
         const [rows] = await pool.execute(`
@@ -17,8 +16,6 @@ router.get('/sales/previous-month', async (req, res) => {
     }
 });
 
-// b) Total sales for a specific day
-// Pass date as query param: ?date=YYYY-MM-DD
 router.get('/sales/by-day', async (req, res) => {
     const { date } = req.query;
     if (!date) return res.status(400).json({ error: 'Date is required. Format: YYYY-MM-DD' });
@@ -35,7 +32,6 @@ router.get('/sales/by-day', async (req, res) => {
     }
 });
 
-// c) Top 5 customers (last 3 months)
 router.get('/top-customers', async (req, res) => {
     try {
         const [rows] = await pool.execute(`
@@ -52,7 +48,6 @@ router.get('/top-customers', async (req, res) => {
     }
 });
 
-// d) Top 10 selling books (last 3 months)
 router.get('/top-books', async (req, res) => {
     try {
         const [rows] = await pool.execute(`
@@ -71,8 +66,6 @@ router.get('/top-books', async (req, res) => {
     }
 });
 
-// e) Total number of times a specific book has been ordered
-// Pass isbn as query param: ?isbn=XXX
 router.get('/book-orders/count', async (req, res) => {
     const { title } = req.query;
     if (!title) return res.status(400).json({ error: 'Title is required' });
