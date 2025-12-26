@@ -127,17 +127,19 @@ router.post("/checkout", async (req, res) => {
 });
 
 // Confirm replenishment order (Admin)
-router.put('/confirm/:id', async (req, res) => {
+router.put("/confirm/:id", async (req, res) => {
   const repOrderId = req.params.id;
 
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
+    // lock the order row so 2 confirms can't run in parallel
     const [rows] = await conn.execute(
       `SELECT rep_order_id, isbn, qty, status
        FROM Publisher_orders
-       WHERE rep_order_id = ?`,
+       WHERE rep_order_id = ?
+       FOR UPDATE`,
       [repOrderId]
     );
 
@@ -146,25 +148,32 @@ router.put('/confirm/:id', async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    if (rows[0].status !== 'pending') {
+    const order = rows[0];
+    if (order.status !== "pending") {
+      await conn.rollback();
+      return res.status(400).json({ error: `Order already ${order.status}` });
+    }
+
+    // update status (only once)
+    const [upd] = await conn.execute(
+      `UPDATE Publisher_orders
+       SET status='confirmed', confirmed_at=NOW()
+       WHERE rep_order_id=? AND status='pending'`,
+      [repOrderId]
+    );
+
+    if (upd.affectedRows !== 1) {
+      // someone else confirmed it first
       await conn.rollback();
       return res.status(400).json({ error: "Order already confirmed" });
     }
 
-    const { isbn, qty } = rows[0];
-
-    await conn.execute(
-      `UPDATE Publisher_orders
-       SET status='confirmed', confirmed_at=NOW()
-       WHERE rep_order_id=?`,
-      [repOrderId]
-    );
-
+    // add qty to stock exactly once
     await conn.execute(
       `UPDATE Books
        SET stock = stock + ?
        WHERE isbn = ?`,
-      [qty, isbn]
+      [order.qty, order.isbn]
     );
 
     await conn.commit();
@@ -179,7 +188,6 @@ router.put('/confirm/:id', async (req, res) => {
 });
 
 // View past orders for a customer
-
 router.get('/user/:customer_username', async (req, res) => {
   const { customer_username } = req.params;
 
