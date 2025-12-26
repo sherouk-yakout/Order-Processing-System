@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Search Books</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/main.js" defer></script>
+  <script src="js/admin-search.js" defer></script>
+</head>
+
+<body onload="requireAuth('admin')">
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="logo">📚 Admin Panel</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <ul class="nav-links">
+      <li><a href="admin-books.html">Books</a></li>
+      <li><a href="admin-search.html">Search</a></li>
+      <li><a href="admin-orders.html">Orders</a></li>
+      <li><a href="admin-reports.html">Reports</a></li>
+    </ul>
+  </nav>
+
+  <main class="container fade-in">
+
+    <h2>🔍 Search Books</h2>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by title, author, ISBN, publisher…">
+      <select id="categoryFilter">
+        <option value="">All Categories</option>
+        <option>Fiction</option>
+        <option>Science</option>
+        <option>Technology</option>
+        <option>Business</option>
+        <option>Kids</option>
+        <option>Comics</option>
+      </select>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div id="loadingSkeleton" class="skeleton-grid hidden"></div>
+
+    <!-- Search results -->
+    <div id="searchResults" class="search-grid"></div>
+
+  </main>
+
+  <footer class="footer">© 2025 Admin Bookstore</footer>
+
+</body>
+</html>
