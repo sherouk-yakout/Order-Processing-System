@@ -36,12 +36,21 @@
         <div class="modal-content">
           <h3>💳 Checkout</h3>
 
-          <input
-            type="text"
-            id="cardNumber"
-            placeholder="Card Number (16 digits)"
-          />
+        <div class="card-input-wrapper">
+  <input
+    type="text"
+    id="creditCardNumber"
+    placeholder="Card Number"
+    maxlength="19"
+  />
+  <span id="cardType" class="card-type"></span>
+</div>
+
+
+
+
           <input type="text" id="expiry" placeholder="Expiry (MM/YY)" />
+          <p id="checkoutError" class="error-msg"></p>
 
           <button class="btn primary-btn" onclick="checkout()">
             Confirm Payment

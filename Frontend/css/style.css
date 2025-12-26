@@ -759,4 +759,28 @@ input:focus, select:focus {
 .toast.error {
   background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
+.hint {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 4px;
+  display: block;
+}
 
+.error-msg {
+  color: red;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.card-input-wrapper {
+  position: relative;
+}
+
+.card-type {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: #555;
+}

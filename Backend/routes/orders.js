@@ -51,16 +51,17 @@ function isValidCreditCard(number) {
 
 // Helper function for expiry date validation (format MM/YY)
 function isValidExpiry(expiry) {
-  if (!expiry) return false; // make sure expiry is provided
-  const parts = expiry.split("/");
-  if (parts.length !== 2) return false;
-  const [month, year] = parts.map(Number);
-  if (!month || !year || month < 1 || month > 12) return false;
+    if (!expiry) return false;
 
-  const current = new Date();
-  const expiryDate = new Date(2000 + year, month - 1, 1);
-  return expiryDate >= new Date(current.getFullYear(), current.getMonth(), 1);
+    const [month, year] = expiry.split('/').map(Number);
+    if (!month || !year || month < 1 || month > 12) return false;
+
+    const now = new Date();
+    const expiryDate = new Date(2000 + year, month, 0); // LAST day of month
+
+    return expiryDate >= now;
 }
+
 
 // Customer checkout
 router.post("/checkout", async (req, res) => {
@@ -75,7 +76,10 @@ router.post("/checkout", async (req, res) => {
   }
 
   if (!isValidCreditCard(credit_card_number)) {
-    return res.status(400).json({ error: "Invalid credit card number" });
+   return res.status(400).json({
+  error: "Invalid credit card number. Use a valid test card like 4242 4242 4242 4242"
+});
+
   }
 
   if (!isValidExpiry(credit_card_expiry)) {
@@ -174,21 +178,52 @@ router.put("/confirm/:orderId", async (req, res) => {
 });
 
 // View past orders for a customer
-router.get("/past/:customer_username", async (req, res) => {
+
+router.get('/user/:customer_username', async (req, res) => {
   const { customer_username } = req.params;
+
   try {
-    const [orders] = await pool.execute(
-      `SELECT co.order_id, co.order_date, co.total_amount, 
-                    oi.isbn, b.title, oi.qty, oi.unit_price
-             FROM Customer_orders co
-             JOIN Order_items oi ON co.order_id = oi.order_id
-             JOIN Books b ON oi.isbn = b.isbn
-             WHERE co.customer_username = ?
-             ORDER BY co.order_date DESC`,
+    const [rows] = await pool.execute(
+      `SELECT 
+         co.order_id,
+         co.order_date,
+         co.total_amount,
+         oi.isbn,
+         oi.qty,
+         oi.unit_price,
+         b.title
+       FROM Customer_orders co
+       JOIN Order_items oi ON co.order_id = oi.order_id
+       JOIN Books b ON oi.isbn = b.isbn
+       WHERE co.customer_username = ?
+       ORDER BY co.order_date DESC`,
       [customer_username]
     );
-    res.json(orders);
+
+    // GROUP ROWS INTO ORDERS
+    const ordersMap = {};
+
+    for (const row of rows) {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          id: row.order_id,
+          created_at: row.order_date,
+          total: row.total_amount,
+          items: []
+        };
+      }
+
+      ordersMap[row.order_id].items.push({
+        isbn: row.isbn,
+        title: row.title,
+        quantity: row.qty,
+        price: row.unit_price
+      });
+    }
+
+    res.json(Object.values(ordersMap));
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });

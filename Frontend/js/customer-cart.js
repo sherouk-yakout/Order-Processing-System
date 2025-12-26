@@ -1,7 +1,60 @@
 const API_BASE = "http://localhost:3000";
 
+function attachCardFormatter() {
+  const cardInput = document.getElementById("creditCardNumber");
+  if (!cardInput || cardInput.dataset.bound) return;
+
+  cardInput.dataset.bound = "true";
+
+  cardInput.addEventListener("input", (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+
+    // limit to 16 digits
+    value = value.slice(0, 16);
+
+    // space every 4 digits
+    value = value.replace(/(.{4})/g, "$1 ").trim();
+
+    e.target.value = value;
+  });
+const typeEl = document.getElementById("cardType");
+const digits = value.replace(/\s/g, "");
+
+if (typeEl) {
+  if (digits.startsWith("4")) {
+    typeEl.textContent = "VISA";
+  } else if (/^5[1-5]/.test(digits)) {
+    typeEl.textContent = "MasterCard";
+  } else if (/^3[47]/.test(digits)) {
+    typeEl.textContent = "AMEX";
+  } else {
+    typeEl.textContent = "";
+  }
+}
+
+
+}
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   loadCart();
+
+  const cardInput = document.getElementById("creditCardNumber");
+
+  if (cardInput) {
+    cardInput.addEventListener("input", (e) => {
+      let value = e.target.value.replace(/\D/g, "");
+
+      // limit to 16 digits
+      value = value.substring(0, 16);
+
+      // add spaces every 4 digits
+      value = value.replace(/(.{4})/g, "$1 ").trim();
+
+      e.target.value = value;
+    });
+  }
 });
 
 async function loadCart() {
@@ -90,7 +143,10 @@ async function removeItem(isbn) {
 
     loadCart();
   } catch (e) {
-    alert(e.message);
+    const errEl = document.getElementById("checkoutError");
+if (errEl) errEl.textContent = e.message;
+else alert(e.message);
+
   }
 }
 
@@ -98,7 +154,11 @@ async function removeItem(isbn) {
 function openCheckout() {
   const modal = document.getElementById("checkoutModal");
   if (modal) modal.classList.remove("hidden");
+
+  // attach formatter AFTER modal opens
+  attachCardFormatter();
 }
+
 
 function closeCheckout() {
   const modal = document.getElementById("checkoutModal");
@@ -109,8 +169,14 @@ async function checkout() {
   const cart_id = localStorage.getItem("cart_id");
   const customer_username = localStorage.getItem("user_id");
 
-  const credit_card_number = (document.getElementById("cardNumber")?.value || "").trim();
+ const credit_card_number =
+  (document.getElementById("creditCardNumber")?.value || "").trim();
+
   const credit_card_expiry = (document.getElementById("expiry")?.value || "").trim();
+
+const cardInput = document.getElementById("creditCardNumber");
+
+
 
   if (!cart_id) return alert("Missing cart_id. Please login again.");
   if (!customer_username) return alert("Missing user_id. Please login again.");
