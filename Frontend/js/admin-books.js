@@ -11,55 +11,53 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function loadBooks() {
-  const out =
-    document.getElementById("booksTableBody") ||
-    document.getElementById("booksList");
+  const out = document.getElementById("bookList"); 
   if (!out) return;
 
-  out.innerHTML = "Loading...";
+  out.innerHTML = `<tr><td colspan="9">Loading...</td></tr>`;
 
   try {
     const res = await fetch(API_BOOKS);
     const raw = await res.text();
     let data = [];
-    try {
-      data = JSON.parse(raw);
-    } catch {}
+    try { data = JSON.parse(raw); } catch {}
 
-    if (!res.ok) throw new Error(data.error || raw || "Failed to load books");
+    if (!res.ok) throw new Error((data && data.error) ? data.error : raw || "Failed to load books");
+
     const books = Array.isArray(data) ? data : [];
 
     if (books.length === 0) {
-      out.innerHTML = "<tr><td colspan='9'>No books found.</td></tr>";
+      out.innerHTML = `<tr><td colspan="9">No books found.</td></tr>`;
       return;
     }
 
     out.innerHTML = "";
+
     for (const b of books) {
+      const coverUrl = b.cover_url || "https://via.placeholder.com/60x80?text=No+Cover";
+
       out.innerHTML += `
         <tr>
+          <td><img src="${escapeAttr(coverUrl)}" alt="cover" style="width:60px;height:80px;object-fit:cover;border-radius:6px;"></td>
           <td>${escapeHtml(b.isbn)}</td>
           <td>${escapeHtml(b.title)}</td>
           <td>${escapeHtml(b.author || "—")}</td>
-          <td>${escapeHtml(b.publisher || "—")}</td>
-          <td>${escapeHtml(String(b.publish_year ?? "—"))}</td>
           <td>${escapeHtml(b.category || "—")}</td>
           <td>${escapeHtml(String(b.price ?? "—"))}</td>
           <td>${escapeHtml(String(b.stock ?? "—"))}</td>
+          <td>${escapeHtml(String(b.threshold ?? "—"))}</td>
           <td>
-            <button class="btn" onclick="openEdit('${escapeAttr(
-              b.isbn
-            )}')">Edit</button>
+            <button class="btn" onclick="openEdit('${escapeAttr(b.isbn)}')">Edit</button>
           </td>
         </tr>
       `;
     }
+
   } catch (e) {
-    out.innerHTML = `<tr><td colspan="9" style="color:red;">${escapeHtml(
-      e.message
-    )}</td></tr>`;
+    out.innerHTML = `<tr><td colspan="9" style="color:red;">${escapeHtml(e.message)}</td></tr>`;
   }
 }
+
 
 async function addBook(e) {
   e.preventDefault();
