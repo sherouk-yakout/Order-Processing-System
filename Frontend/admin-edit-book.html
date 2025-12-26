@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Edit Book</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="js/main.js" defer></script>
+  <script src="js/admin-edit-book.js" defer></script>
+</head>
+
+<body onload="requireAuth('admin')">
+
+  <nav class="navbar">
+    <a href="admin-dashboard.html" class="logo">📚 Admin Panel</a>
+    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <ul class="nav-links">
+      <li><a href="admin-books.html">Books</a></li>
+      <li><a href="admin-search.html">Search</a></li>
+      <li><a href="admin-orders.html">Orders</a></li>
+      <li><a href="admin-reports.html">Reports</a></li>
+      <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <main class="container fade-in">
+    <h2>✏️ Edit Book</h2>
+
+    <section class="card form-card">
+      <form id="editBookForm">
+        <input type="hidden" id="edit_isbn">
+
+        <input type="text" id="edit_title" placeholder="Title" required>
+        <input type="text" id="edit_authors" placeholder="Authors (comma separated)" required>
+        <input type="text" id="edit_publisher" placeholder="Publisher" required>
+        <input type="number" id="edit_publish_year" placeholder="Year" required>
+        <input type="text" id="edit_category" placeholder="Category" required>
+        <input type="number" id="edit_price" placeholder="Price" step="0.01" required>
+        <input type="number" id="edit_stock" placeholder="Stock" required>
+        <input type="number" id="edit_threshold" placeholder="Threshold" required>
+
+        <button class="btn primary-btn" type="submit">💾 Update</button>
+        <button type="button" class="btn" onclick="window.location.href='admin-search.html'">Cancel</button>
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="footer">© 2025 Admin Books</footer>
+
+</body>
+</html>

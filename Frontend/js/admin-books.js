@@ -6,15 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const isbn = params.get("isbn");
 
-  if (isbn) {
-    setTimeout(() => openEdit(isbn), 500);
-  }
-
   const addForm = document.getElementById("bookForm");
   if (addForm) addForm.addEventListener("submit", addBook);
 
-  const editForm = document.getElementById("editBookForm");
-  if (editForm) editForm.addEventListener("submit", saveEdit);
+ 
 });
 
 async function loadBooks() {
@@ -96,67 +91,9 @@ async function addBook(e) {
   }
 }
 
-async function openEdit(isbn) {
-  try {
-    const res = await fetch(`${API_BOOKS}/${isbn}`);
-    const book = await res.json();
 
-    if (!res.ok) throw new Error(book.error || "Failed to load book");
 
-    valSet("edit_isbn", book.isbn);
-    valSet("edit_title", book.title);
-    valSet("edit_category", book.category);
-    valSet("edit_publish_year", book.publish_year);
-    valSet("edit_price", book.price);
-    valSet("edit_stock", book.stock);
-    valSet("edit_threshold", book.threshold);
-    valSet("edit_publisher", book.publisher);
-    valSet("edit_authors", book.authors);
 
-    const modal = document.getElementById("editModal");
-    if (modal) modal.classList.remove("hidden");
-
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
-async function saveEdit(e) {
-  e.preventDefault();
-
-  const isbn = val("edit_isbn");
-  const title = val("edit_title");
-  const category = val("edit_category");
-  const publish_year = Number(val("edit_publish_year") || 0);
-  const price = Number(val("edit_price") || 0);
-  const stock = Number(val("edit_stock") || 0);
-  const threshold = Number(val("edit_threshold") || 0);
-  const pub_id = Number(val("edit_pub_id") || 0);
-  const publisher = val("edit_publisher");
-   const author = val("edit_authors");
-
-  try {
-    const res = await fetch(`${API_BOOKS}/${encodeURIComponent(isbn)}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, category, publish_year, price, stock, threshold, publisher, authors: author})
-    });
-
-    const raw = await res.text();
-    let data = {};
-    try { data = JSON.parse(raw); } catch {}
-
-    if (!res.ok) throw new Error(data.error || raw || "Update failed");
-    alert("Book updated ✔️");
-
-    const modal = document.getElementById("editModal");
-    if (modal) modal.classList.add("hidden");
-
-    loadBooks();
-  } catch (err) {
-    alert(err.message);
-  }
-}
 
 /* helpers */
 function val(id) {

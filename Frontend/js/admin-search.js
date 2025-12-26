@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBooks(); // load all initially
 });
 function editBook(isbn) {
-  window.location.href = `admin-books.html?isbn=${isbn}`;
+  window.location.href = `admin-edit-book.html?isbn=${isbn}`;
 }
 async function getBookImage(isbn) {
   const clean = String(isbn || "").replace(/[^0-9X]/gi, "");
