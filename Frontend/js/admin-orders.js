@@ -1,4 +1,4 @@
-const ORDERS_API = "http://localhost:3000/admin/orders";
+const ORDERS_API = "http://localhost:3000/orders";
 
 // Fetch Google Books thumbnail
 async function getBookImage(isbn) {
@@ -55,30 +55,30 @@ async function renderOrders(orders) {
 
     const actionButton =
       order.status === "pending"
-        ? `<button class="btn primary-btn" onclick="confirmOrder(${order.id})">Confirm ✔️</button>`
+        ? `<button class="btn primary-btn" onclick="confirmOrder(${order.rep_order_id})">Confirm ✔️</button>`
         : `<p class="success-text">Order confirmed ✔️</p>`;
 
     container.innerHTML += `
       <div class="card order-card fade-in">
 
-        <div class="order-header" onclick="toggleOrder(${order.id})">
+        <div class="order-header" onclick="toggleOrder(${order.rep_order_id})">
           <div>
-            <h3>Order #${order.id}</h3>
+            <h3>Order #${order.rep_order_id}</h3>
             <p>${new Date(order.created_at).toLocaleDateString()}</p>
           </div>
 
           <span class="order-status ${statusClass}">${order.status}</span>
 
-          <span id="arrow-${order.id}" class="arrow">▼</span>
+          <span id="arrow-${order.rep_order_id}" class="arrow">▼</span>
         </div>
 
-        <div id="items-${order.id}" class="order-details hidden">
+        <div id="items-${order.rep_order_id}" class="order-details hidden">
 
           <div class="order-detail-item">
             <img src="${img}" class="order-img" />
             <div>
-              <p><strong>Book:</strong> ${order.title}</p>
-              <p><strong>Quantity:</strong> ${order.quantity}</p>
+              <p><strong>Title:</strong> ${order.title}</p>
+              <p><strong>Quantity:</strong> ${order.qty}</p>
               <p><strong>ISBN:</strong> ${order.isbn}</p>
             </div>
           </div>

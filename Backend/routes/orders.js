@@ -2,6 +2,30 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+// GET all publisher orders (for admin) including book title
+router.get('/', async (req, res) => {
+    try {
+        const [rows] = await pool.execute(`
+            SELECT po.rep_order_id,
+                   po.isbn,
+                   po.pub_id,
+                   po.qty,
+                   po.status,
+                   po.created_at,
+                   po.confirmed_at,
+                   b.title
+            FROM Publisher_orders po
+            JOIN Books b ON po.isbn = b.isbn
+            ORDER BY po.created_at DESC
+        `);
+
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+});
+
 // Helper function for credit card validation (basic Luhn check)
 function isValidCreditCard(number) {
     if (!number) return false;
