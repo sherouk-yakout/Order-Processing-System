@@ -32,6 +32,11 @@ document.getElementById("accountForm").addEventListener("submit", async (e) => {
     shipping_address: document.getElementById("address").value
   };
 
+  const newPass = document.getElementById("newPassword")?.value;
+  if (newPass && newPass.trim().length > 0) {
+    updated.password = newPass.trim();
+  }
+
   const res = await fetch(`${ACCOUNT_API}/update/${user_id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -40,6 +45,12 @@ document.getElementById("accountForm").addEventListener("submit", async (e) => {
 
   if (res.ok) {
     alert("Profile updated ✔️");
+
+    // If username changed, keep frontend session consistent
+    if (updated.username && updated.username !== user_id) {
+      localStorage.setItem("user_id", updated.username);
+      localStorage.setItem("username", updated.username);
+    }
   } else {
     alert("Error updating profile ❌");
   }

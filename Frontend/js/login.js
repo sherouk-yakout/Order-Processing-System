@@ -1,31 +1,42 @@
-document.querySelectorAll(".toggle-eye").forEach(icon => {
-  icon.onclick = () => {
-    const input = document.getElementById(icon.dataset.target);
-    input.type = input.type === "password" ? "text" : "password";
-  };
-});
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-document.getElementById("loginForm").addEventListener("submit", async e => {
-  e.preventDefault();
+    // Backend expects: { email, password }
+    const loginData = {
+        email: document.getElementById("loginEmail")?.value.trim(),
+        password: document.getElementById("loginPassword")?.value.trim(),
+    };
 
-  const loginData = {
-    username: document.getElementById("loginUsername").value,
-    password: document.getElementById("loginPassword").value
-  };
+    try {
+        const res = await fetch("http://localhost:3000/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(loginData),
+        });
 
-  const res = await fetch("http://localhost:3000/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(loginData)
-  });
+        const data = await res.json().catch(() => ({}));
 
-  const data = await res.json();
+        if (res.ok) {
+            // Backend returns: { message, user_id, role }
+            const role = (data.role || "").toLowerCase();
 
-  if (!res.ok) return alert(data.message || "Login failed ❌");
+            // In this project, we use user_id (username) as the session key
+            localStorage.setItem("user_id", data.user_id);
+            localStorage.setItem("username", data.user_id);
+            localStorage.setItem("role", role);
 
-  localStorage.setItem("username", data.username);
-  localStorage.setItem("role", data.role);
+            alert("Login successful ✔️");
 
-  window.location.href =
-    data.role === "Admin" ? "admin-dashboard.html" : "customer-dashboard.html";
+            if (role === "admin") {
+                window.location.href = "admin-dashboard.html";
+            } else {
+                window.location.href = "customer-dashboard.html";
+            }
+        } else {
+            alert(data.error || "Login failed ❌");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Cannot reach backend. Make sure Backend is running on http://localhost:3000 ❌");
+    }
 });

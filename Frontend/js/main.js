@@ -49,15 +49,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.requireAuth = function(role = null) {
 
-  const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role");
+  // This project uses simple localStorage-based auth (no JWT in backend).
+  // We treat "user_id" (username) + "role" as the session.
+  const userId = localStorage.getItem("user_id");
+  const userRole = (localStorage.getItem("role") || "").toLowerCase();
+  const requiredRole = (role || "").toLowerCase();
 
-  if (!token) {
-    window.location.href = "auth.html";
+  if (!userId) {
+    window.location.href = "login.html";
     return;
   }
 
-  if (role && role !== userRole) {
+  if (requiredRole && requiredRole !== userRole) {
     alert("Unauthorized access ❌");
     window.location.href = "index.html";
   }

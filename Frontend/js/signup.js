@@ -1,33 +1,35 @@
-document.querySelectorAll(".toggle-eye").forEach(icon => {
-  icon.onclick = () => {
-    const input = document.getElementById(icon.dataset.target);
-    input.type = input.type === "password" ? "text" : "password";
-  };
-});
+document.getElementById("signupForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-document.getElementById("signupForm").addEventListener("submit", async e => {
-  e.preventDefault();
+    // Backend expects POST /auth/signup with keys:
+    // { username, password, first_name, last_name, email, phone, shipping_address }
+    const newUser = {
+        username: document.getElementById("signupUsername")?.value.trim(),
+        password: document.getElementById("signupPassword")?.value.trim(),
+        first_name: document.getElementById("signupFirstName")?.value.trim(),
+        last_name: document.getElementById("signupLastName")?.value.trim(),
+        email: document.getElementById("signupEmail")?.value.trim(),
+        phone: document.getElementById("signupPhone")?.value.trim(),
+        shipping_address: document.getElementById("signupAddress")?.value.trim(),
+    };
 
-  const newUser = {
-    username: document.getElementById("signupUsername").value,
-    fname: document.getElementById("signupFirstName").value,
-    lname: document.getElementById("signupLastName").value,
-    email: document.getElementById("signupEmail").value,
-    phone: document.getElementById("signupPhone").value,
-    shipping_address: document.getElementById("signupAddress").value,
-    password: document.getElementById("signupPassword").value
-  };
+    try {
+        const res = await fetch("http://localhost:3000/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newUser),
+        });
 
-  const res = await fetch("http://localhost:3000/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newUser),
-  });
+        const data = await res.json().catch(() => ({}));
 
-  const data = await res.json();
-
-  if (!res.ok) return alert(data.error || "Signup failed ❌");
-
-  alert("Account created successfully ✔️");
-  window.location.href = "login.html";
+        if (res.ok) {
+            alert("Account created successfully ✔️");
+            window.location.href = "login.html";
+        } else {
+            alert(data.error || "Signup failed ❌");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Cannot reach backend. Make sure Backend is running on http://localhost:3000 ❌");
+    }
 });
