@@ -1,81 +1,79 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Admin Reports</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/main.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="js/admin-reports.js" defer></script>
-</head>
+  <head>
+    <title>Admin Reports</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/admin-reports.js" defer></script>
+  </head>
 
-<body onload="requireAuth('admin')">
+  <body onload="requireAuth('admin')">
+    <nav class="navbar">
+      <a href="admin-dashboard.html" class="logo">📊 Admin Reports</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
+    </nav>
 
-  <nav class="navbar">
-    <a href="admin-dashboard.html" class="logo">📊 Admin Reports</a>
-    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-    <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
-  </nav>
+    <main class="container fade-in">
+      <h2>📈 Analytics & Reports</h2>
 
-  <main class="container fade-in">
+      <section class="grid-4 mt-30">
+        <div class="card stat-card" id="statLastMonth">Loading...</div>
+        <div class="card stat-card" id="statOrdersMonth">—</div>
+        <div class="card stat-card" id="statAvgOrder">—</div>
+        <div class="card stat-card" id="statTopCategory">—</div>
+      </section>
 
-    <h2>📈 Analytics & Reports</h2>
+      <section class="card mt-40">
+        <h3>📉 Monthly Sales</h3>
+        <canvas id="chartMonthlySales"></canvas>
+      </section>
 
-    <!-- STATS CARDS -->
-    <section class="grid-4 mt-30">
-      <div class="card stat-card" id="statLastMonth">Loading...</div>
-      <div class="card stat-card" id="statOrdersMonth">Loading...</div>
-      <div class="card stat-card" id="statAvgOrder">Loading...</div>
-      <div class="card stat-card" id="statTopCategory">Loading...</div>
-    </section>
+      <section class="card mt-40">
+        <h3>🏆 Top 10 Best-Selling Books</h3>
+        <canvas id="chartTopBooks"></canvas>
+      </section>
 
-    <!-- MONTHLY SALES CHART -->
-    <section class="card mt-40">
-      <h3>📉 Monthly Sales</h3>
-      <canvas id="chartMonthlySales"></canvas>
-    </section>
+      <section class="card mt-40">
+        <h3>👑 Top 5 Customers</h3>
+        <div id="topCustomers"></div>
+      </section>
 
-    <!-- TOP BOOKS CHART -->
-    <section class="card mt-40">
-      <h3>🏆 Top 10 Best-Selling Books</h3>
-      <canvas id="chartTopBooks"></canvas>
-    </section>
+      <section class="card mt-40">
+        <h3>📅 Sales on a Specific Date</h3>
 
-    <!-- TOP CUSTOMERS -->
-    <section class="card mt-40">
-      <h3>👑 Top 5 Customers</h3>
-      <div id="topCustomers"></div>
-    </section>
+        <input type="date" id="specificDate" />
+        <button class="btn primary-btn" onclick="getSalesOnDate()">
+          Search
+        </button>
 
-    <!-- SALES ON SPECIFIC DATE -->
-    <section class="card mt-40">
-      <h3>📅 Sales on a Specific Date</h3>
+        <div id="salesOnDate" class="mt-20"></div>
+      </section>
 
-      <input type="date" id="specificDate">
-      <button class="btn primary-btn" onclick="getSalesOnDate()">Search</button>
+      <section class="card mt-40">
+        <h3>📚 Top Books Table</h3>
+        <div id="topBooks"></div>
+      </section>
 
-      <div id="salesOnDate" class="mt-20"></div>
-    </section>
+      <section class="card mt-40">
+        <h3>🔢 How Many Times Was a Book Ordered?</h3>
 
-    <!-- TOP BOOKS TABLE -->
-    <section class="card mt-40">
-      <h3>📚 Top Books Table</h3>
-      <div id="topBooks"></div>
-    </section>
+        <input
+          type="text"
+          id="bookTitleSearch"
+          placeholder="Enter book title"
+        />
+        <button class="btn primary-btn" onclick="loadBookOrderCount()">
+          Check
+        </button>
 
-    <!-- BOOK ORDER COUNT -->
-    <section class="card mt-40">
-      <h3>🔢 How Many Times Was a Book Ordered?</h3>
+        <div id="bookOrderCount" class="mt-20"></div>
+      </section>
+    </main>
 
-      <input type="text" id="bookTitleSearch" placeholder="Enter book title">
-      <button class="btn primary-btn" onclick="loadBookOrderCount()">Check</button>
-
-      <div id="bookOrderCount" class="mt-20"></div>
-    </section>
-
-  </main>
-
-  <footer class="footer">© 2025 Admin Reports</footer>
-  <script>
+    <footer class="footer">© 2025 Admin Reports</footer>
+    <script>
       document
         .getElementById("logoutBtn")
         ?.addEventListener("click", function (e) {
@@ -88,5 +86,5 @@
           window.location.href = "./login.html";
         });
     </script>
-</body>
+  </body>
 </html>
