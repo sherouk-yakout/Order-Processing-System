@@ -1,35 +1,33 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Your Orders</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/main.js"></script>
-  <script src="js/customer-order.js" defer></script>
-</head>
+  <head>
+    <title>Your Orders</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js"></script>
+    <script src="js/customer-order.js" defer></script>
+  </head>
 
-<body onload="requireAuth('customer')">
+  <body onload="requireAuth('customer')">
+    <nav class="navbar">
+      <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <ul class="nav-links">
+        <li><a href="customer-search.html">Search</a></li>
+        <li><a href="customer-cart.html">Cart</a></li>
+        <li><a href="customer-account.html">Account</a></li>
 
-  <nav class="navbar">
-    <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
-    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-    <ul class="nav-links">
-      <li><a href="customer-search.html">Search</a></li>
-      <li><a href="customer-cart.html">Cart</a></li>
-      <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+        <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+      </ul>
+    </nav>
 
-    </ul>
-  </nav>
+    <main class="container fade-in">
+      <h2>📦 Your Orders</h2>
 
-  <main class="container fade-in">
+      <div id="ordersContainer" class="orders-grid"></div>
+    </main>
 
-    <h2>📦 Your Orders</h2>
-
-    <div id="ordersContainer" class="orders-grid"></div>
-
-  </main>
-
-  <footer class="footer">© 2025 Bookstore</footer>
-  <script>
+    <footer class="footer">© 2025 Bookstore</footer>
+    <script>
       document
         .getElementById("logoutBtn")
         ?.addEventListener("click", function (e) {
@@ -42,5 +40,5 @@
           window.location.href = "./login.html";
         });
     </script>
-</body>
+  </body>
 </html>

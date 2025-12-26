@@ -43,7 +43,6 @@ router.get('/', async (req, res) => {
     params.push(`%${publisher}%`);
   }
 
-  // aggregate => filter in HAVING
   if (author) {
     having.push('author LIKE ?');
     havingParams.push(`%${author}%`);
