@@ -16,16 +16,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const isbnCountBtn = document.getElementById("isbnCountBtn");
   if (isbnCountBtn) isbnCountBtn.addEventListener("click", loadBookOrderCount);
 });
+document.addEventListener("DOMContentLoaded", () => {
+  getPreviousMonthSales(); // automatically load previous month sales
+});
 
-async function loadPreviousMonthSales() {
-  setOut("reportOut", "Loading...");
-  await fetchToOut(`${API_BASE}/reports/sales/previous-month`, "reportOut");
-}
 
-async function loadSalesByDay() {
-  const date = (document.getElementById("salesDate")?.value || "").trim();
+async function getSalesOnDate() {
+  const date = (document.getElementById("specificDate")?.value || "").trim();
   if (!date) return alert("Choose a date first (YYYY-MM-DD)");
-  await fetchToOut(`${API_BASE}/reports/sales/by-day?date=${encodeURIComponent(date)}`, "reportOut");
+  await fetchToOut(`${API_BASE}/reports/sales/by-day?date=${encodeURIComponent(date)}`, "salesOnDate");
+}
+async function getPreviousMonthSales() {
+  const outId = "statLastMonth"; // or any div you want to show it in
+  setOut(outId, "Loading...");
+  try {
+    const res = await fetch(`${API_BASE}/reports/sales/previous-month`);
+    const data = await res.json();
+    setOut(outId, `📅 Total sales last month: <strong>${data.total_sales || 0}</strong>`);
+  } catch (e) {
+    setOut(outId, `<p style="color:red;">${e.message}</p>`);
+  }
 }
 
 async function loadTopCustomers() {
@@ -37,9 +47,9 @@ async function loadTopBooks() {
 }
 
 async function loadBookOrderCount() {
-  const isbn = (document.getElementById("isbnInput")?.value || "").trim();
-  if (!isbn) return alert("Enter ISBN");
-  await fetchToOut(`${API_BASE}/reports/book-orders/count?isbn=${encodeURIComponent(isbn)}`, "reportOut");
+  const title= (document.getElementById("bookTitleSearch")?.value || "").trim();
+  if (!title) return alert("Enter book title");
+  await fetchToOut(`${API_BASE}/reports/book-orders/count?title=${encodeURIComponent(title)}`, "bookOrderCount");
 }
 
 async function fetchToOut(url, outId) {

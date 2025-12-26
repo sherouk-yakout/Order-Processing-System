@@ -74,10 +74,14 @@ router.get('/top-books', async (req, res) => {
 // e) Total number of times a specific book has been ordered
 // Pass isbn as query param: ?isbn=XXX
 router.get('/book-orders/count', async (req, res) => {
-    const { isbn } = req.query;
-    if (!isbn) return res.status(400).json({ error: 'ISBN is required' });
+    const { title } = req.query;
+    if (!title) return res.status(400).json({ error: 'Title is required' });
 
     try {
+        const [books] = await pool.execute(`SELECT isbn FROM Books WHERE title = ?`, [title]);
+        if (books.length === 0) return res.status(404).json({ error: 'Book not found' });
+
+        const isbn = books[0].isbn;
         const [rows] = await pool.execute(`
             SELECT COUNT(*) AS times_ordered
             FROM Publisher_orders
