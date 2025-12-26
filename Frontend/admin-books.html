@@ -16,12 +16,12 @@
   </nav>
 
   <main class="container fade-in">
-
+   
     <h2>📘 Manage Books</h2>
 
     <section class="card form-card">
       <h3 id="formTitle">Add New Book</h3>
-
+      
       <form id="bookForm">
         <input type="hidden" id="bookId">
 
@@ -43,6 +43,30 @@
         <button class="btn primary-btn" type="submit">💾 Save Book</button>
       </form>
     </section>
+      <!-- EDIT BOOK MODAL -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>✏️ Edit Book</h3>
+
+      <form id="editBookForm">
+
+        <input type="hidden" id="edit_isbn">
+
+        <input type="text" id="edit_title" placeholder="Title">
+        <input type="text" id="edit_authors" placeholder="Authors">
+        <input type="text" id="edit_publisher" placeholder="Publisher">
+        <input type="number" id="edit_publish_year" placeholder="Year">
+        <input type="text" id="edit_category" placeholder="Category">
+        <input type="number" id="edit_price" placeholder="Price">
+        <input type="number" id="edit_stock" placeholder="Stock">
+        <input type="number" id="edit_threshold" placeholder="Threshold">
+
+        <button class="btn primary-btn" type="submit">💾 Update</button>
+        <button type="button" class="btn" onclick="closeEdit()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
     <section class="card">
       <h3>📚 Books Inventory</h3>
 

@@ -65,6 +65,42 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:isbn', async (req, res) => {
+  const { isbn } = req.params;
+
+  try {
+    const [rows] = await pool.execute(
+      `
+      SELECT
+        b.isbn,
+        b.title,
+        b.category,
+        b.publish_year,
+        b.price,
+        b.stock,
+        b.threshold,
+        p.pub_name AS publisher,
+        COALESCE(GROUP_CONCAT(a.author_name SEPARATOR ', '), '') AS authors
+      FROM Books b
+      JOIN Publishers p ON b.pub_id = p.pub_id
+      LEFT JOIN Book_authors ba ON b.isbn = ba.isbn
+      LEFT JOIN Authors a ON ba.author_id = a.author_id
+      WHERE b.isbn = ?
+      GROUP BY b.isbn
+      `,
+      [isbn]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Add new book (Admin only)
 router.post('/', async (req, res) => {
   const { isbn, title, category, publish_year, price, stock, threshold, publisher,authors } = req.body;

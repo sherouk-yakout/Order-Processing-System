@@ -16,7 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   searchBooks(); // load all initially
 });
-
+function editBook(isbn) {
+  window.location.href = `admin-books.html?isbn=${isbn}`;
+}
 async function getBookImage(isbn) {
   const clean = String(isbn || "").replace(/[^0-9X]/gi, "");
   if (!clean) return "https://via.placeholder.com/150?text=No+Image";
@@ -84,6 +86,11 @@ async function searchBooks() {
       <div class="card book-card fade-in">
         <img src="${imageUrl}" class="book-cover"
           onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=No+Image';" />
+          <button class="btn primary-btn"
+  onclick="editBook('${book.isbn}')">
+  ✏️ Edit
+</button>
+
         <div class="book-info">
           <h3>${book.title || "Untitled"}</h3>
           <p><strong>Author:</strong> ${book.author || "—"}</p>

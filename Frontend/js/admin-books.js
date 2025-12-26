@@ -3,6 +3,12 @@ const API_BOOKS = `${API_BASE}/books`;
 
 document.addEventListener("DOMContentLoaded", () => {
   loadBooks();
+  const params = new URLSearchParams(window.location.search);
+  const isbn = params.get("isbn");
+
+  if (isbn) {
+    setTimeout(() => openEdit(isbn), 500);
+  }
 
   const addForm = document.getElementById("bookForm");
   if (addForm) addForm.addEventListener("submit", addBook);
@@ -90,13 +96,29 @@ async function addBook(e) {
   }
 }
 
-function openEdit(isbn) {
-  const editIsbn = document.getElementById("edit_isbn");
-  if (editIsbn) editIsbn.value = isbn;
+async function openEdit(isbn) {
+  try {
+    const res = await fetch(`${API_BOOKS}/${isbn}`);
+    const book = await res.json();
 
-  // If you already have modal, open it here.
-  const modal = document.getElementById("editModal");
-  if (modal) modal.classList.remove("hidden");
+    if (!res.ok) throw new Error(book.error || "Failed to load book");
+
+    valSet("edit_isbn", book.isbn);
+    valSet("edit_title", book.title);
+    valSet("edit_category", book.category);
+    valSet("edit_publish_year", book.publish_year);
+    valSet("edit_price", book.price);
+    valSet("edit_stock", book.stock);
+    valSet("edit_threshold", book.threshold);
+    valSet("edit_publisher", book.publisher);
+    valSet("edit_authors", book.authors);
+
+    const modal = document.getElementById("editModal");
+    if (modal) modal.classList.remove("hidden");
+
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
 async function saveEdit(e) {
@@ -147,3 +169,12 @@ function escapeHtml(s) {
 function escapeAttr(s) {
   return String(s).replace(/'/g, "\\'");
 }
+function valSet(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value ?? "";
+}
+function closeEdit() {
+  const modal = document.getElementById("editModal");
+  if (modal) modal.classList.add("hidden");
+}
+
