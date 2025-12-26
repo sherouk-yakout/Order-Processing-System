@@ -3,11 +3,7 @@
 <head>
   <title>Search Books</title>
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- ✅ defer main.js -->
   <script src="js/main.js" defer></script>
-
-  <!-- ✅ your page logic -->
   <script src="js/customer-search.js" defer></script>
 </head>
 
@@ -16,6 +12,8 @@
   <nav class="navbar">
     <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
     <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
+
   </nav>
 
   <main class="container fade-in">
@@ -36,15 +34,26 @@
       </select>
     </div>
 
-    <!-- Loading skeleton -->
     <div id="loadingSkeleton" class="skeleton-grid hidden"></div>
 
-    <!-- Results -->
     <div id="searchResults" class="search-grid"></div>
 
   </main>
 
   <footer class="footer">© 2025 Bookstore</footer>
+  <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
+
+          window.location.href = "./login.html";
+        });
+    </script>
 
 </body>
 </html>

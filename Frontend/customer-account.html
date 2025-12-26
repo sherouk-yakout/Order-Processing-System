@@ -1,87 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Account</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account</title>
 
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/main.js"></script>
-  <script src="js/customer-account.js" defer></script>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js"></script>
+    <script src="js/customer-account.js" defer></script>
+    
 
-  <style>
-    /* Center the card */
-    .account-wrapper {
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-    }
+    <style>
+      .account-wrapper {
+        max-width: 500px;
+        margin: auto;
+        padding: 20px;
+      }
 
-    .glass {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 25px;
-    }
-    .dark-theme .glass {
-      background: rgba(40, 40, 40, 0.6);
-    }
+      .glass {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 25px;
+      }
+      .dark-theme .glass {
+        background: rgba(40, 40, 40, 0.6);
+      }
 
-    .account-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+      .account-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
 
-    .section-title {
-      margin-top: 25px;
-      font-weight: 600;
-      opacity: 0.8;
-    }
-  </style>
-</head>
+      .section-title {
+        margin-top: 25px;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
 
-<body>
-  <nav class="navbar">
-    <a href="customer-dashboard.html" class="logo">📚 My Account</a>
-    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-    <ul class="nav-links">
-      <li><a href="customer-dashboard.html">Dashboard</a></li>
-      <li><a href="customer-orders.html">My Orders</a></li>
-      <li><a href="customer-cart.html">Cart</a></li>
-    </ul>
-  </nav>
+  <body>
+    <nav class="navbar">
+      <a href="customer-dashboard.html" class="logo">📚 My Account</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <ul class="nav-links">
+        <li><a href="customer-dashboard.html">Dashboard</a></li>
+        <li><a href="customer-orders.html">My Orders</a></li>
+        <li><a href="customer-cart.html">Cart</a></li>
+        <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+      </ul>
+    </nav>
 
-  <main class="container fade-in">
-    <div class="account-wrapper glass card">
+    <main class="container fade-in">
+      <div class="account-wrapper glass card">
+        <h2>👤 Profile Information</h2>
 
-      <h2>👤 Profile Information</h2>
+        <form id="accountForm" class="account-form">
+          <p id="accountMsg" style="margin: 0; font-weight: 600"></p>
+          <label class="section-title">Personal Details</label>
 
-      <form id="accountForm" class="account-form" >
-        <p id="accountMsg" style="margin:0; font-weight:600;"></p>
-        <label class="section-title">Personal Details</label>
+          <input type="text" id="firstName" placeholder="First Name" required />
+          <input type="text" id="lastName" placeholder="Last Name" required />
+          <input type="text" id="username" placeholder="Username" required />
 
-        <input type="text" id="firstName" placeholder="First Name" required />
-        <input type="text" id="lastName" placeholder="Last Name" required />
-        <input type="text" id="username" placeholder="Username" required />
+          <label class="section-title">Contact Information</label>
 
-        <label class="section-title">Contact Information</label>
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="text" id="phone" placeholder="Phone Number" required />
+          <textarea
+            id="address"
+            placeholder="Shipping Address"
+            required
+          ></textarea>
 
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="text" id="phone" placeholder="Phone Number" required />
-        <textarea id="address" placeholder="Shipping Address" required></textarea>
+          <label class="section-title">Change Password (optional)</label>
+          <input type="password" id="newPassword" placeholder="New Password" />
 
-        <label class="section-title">Change Password (optional)</label>
-        <input type="password" id="newPassword" placeholder="New Password" />
+          <button class="btn primary-btn">Save Changes ✔️</button>
+          <button type="button" class="btn secondary-btn back-btn">
+            ⬅ Back
+          </button>
+        </form>
+      </div>
+    </main>
 
-        <button class="btn primary-btn">Save Changes ✔️</button>
-        <button type="button" class="btn secondary-btn back-btn">⬅ Back</button>
+    <footer class="footer">© 2025 Bookstore</footer>
+    <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
 
-      </form>
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
 
-    </div>
-  </main>
-
-  <footer class="footer">© 2025 Bookstore</footer>
-</body>
+          window.location.href = "./login.html";
+        });
+    </script>
+  </body>
 </html>

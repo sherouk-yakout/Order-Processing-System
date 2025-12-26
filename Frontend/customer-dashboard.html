@@ -1,70 +1,82 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Customer Dashboard</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="js/main.js"></script>
-  <script src="js/customer-dashboard.js" defer></script>
-</head>
+  <head>
+    <title>Customer Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js"></script>
+    <script src="js/customer-dashboard.js" defer></script>
+  </head>
 
-<body onload="requireAuth('customer')">
+  <body onload="requireAuth('customer')">
+    <!-- HEADER / NAV -->
+    <nav class="navbar">
+      <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
 
-  <!-- HEADER / NAV -->
-  <nav class="navbar">
-    <a href="customer-dashboard.html" class="logo">📚 Bookstore</a>
-    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
-    <ul class="nav-links">
-      <li><a href="customer-search.html">Search</a></li>
-      <li><a href="customer-cart.html">Cart</a></li>
-      <li><a href="customer-orders.html">Orders</a></li>
-      <li><a href="./customer-account.html" class="nav-link">Account</a></li>
+      <ul class="nav-links">
+        <li><a href="customer-search.html">Search</a></li>
+        <li><a href="customer-cart.html">Cart</a></li>
+        <li><a href="customer-orders.html">Orders</a></li>
+        <li><a href="./customer-account.html" class="nav-link">Account</a></li>
+        <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+      </ul>
+    </nav>
 
-    </ul>
-  </nav>
+    <main class="container fade-in">
+      <section class="banner-card">
+        <h2>👋 Welcome, <span id="customerName"></span></h2>
+        <p>Your personal bookstore dashboard.</p>
+      </section>
 
-  <main class="container fade-in">
+      <section class="grid-3 mt-30">
+        <div class="card stat-card">
+          <h3 id="cartCount">0</h3>
+          <p>Items in Cart</p>
+        </div>
 
-    <section class="banner-card">
-      <h2>👋 Welcome, <span id="customerName"></span></h2>
-      <p>Your personal bookstore dashboard.</p>
-    </section>
+        <div class="card stat-card">
+          <h3 id="orderCount">0</h3>
+          <p>Your Orders</p>
+        </div>
 
-    <section class="grid-3 mt-30">
+        <div class="card stat-card">
+          <h3 id="categoryCount">0</h3>
+          <p>Categories Available</p>
+        </div>
+      </section>
 
-      <div class="card stat-card">
-        <h3 id="cartCount">0</h3>
-        <p>Items in Cart</p>
-      </div>
+      <section class="quick-actions mt-40">
+        <a href="customer-search.html" class="btn primary-btn"
+          >🔍 Search Books</a
+        >
+        <a href="customer-cart.html" class="btn primary-btn">🛒 View Cart</a>
+        <a href="customer-orders.html" class="btn primary-btn"
+          >📦 Your Orders</a
+        >
+        <a class="btn primary" href="./customer-account.html">Edit Profile</a>
+      </section>
 
-      <div class="card stat-card">
-        <h3 id="orderCount">0</h3>
-        <p>Your Orders</p>
-      </div>
+      <section class="mt-50">
+        <h2>🌟 Recommended For You</h2>
+        <p class="subtext">Based on your preferred categories</p>
 
-      <div class="card stat-card">
-        <h3 id="categoryCount">0</h3>
-        <p>Categories Available</p>
-      </div>
+        <div id="recommendedContainer" class="recommend-grid"></div>
+      </section>
+    </main>
 
-    </section>
+    <footer class="footer">© 2025 Customer Dashboard</footer>
+    <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
 
-    <section class="quick-actions mt-40">
-      <a href="customer-search.html" class="btn primary-btn">🔍 Search Books</a>
-      <a href="customer-cart.html" class="btn primary-btn">🛒 View Cart</a>
-      <a href="customer-orders.html" class="btn primary-btn">📦 Your Orders</a>
-      <a class="btn primary" href="./customer-account.html">Edit Profile</a>
-    </section>
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
 
-    <section class="mt-50">
-      <h2>🌟 Recommended For You</h2>
-      <p class="subtext">Based on your preferred categories</p>
-
-      <div id="recommendedContainer" class="recommend-grid"></div>
-    </section>
-
-  </main>
-
-  <footer class="footer">© 2025 Customer Dashboard</footer>
-
-</body>
+          window.location.href = "./login.html";
+        });
+    </script>
+  </body>
 </html>

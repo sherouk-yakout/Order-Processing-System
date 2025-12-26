@@ -17,6 +17,7 @@
       <li><a href="admin-search.html">Search</a></li>
       <li><a href="admin-orders.html">Orders</a></li>
       <li><a href="admin-reports.html">Reports</a></li>
+      <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
     </ul>
   </nav>
 
@@ -46,6 +47,19 @@
   </main>
 
   <footer class="footer">© 2025 Admin Bookstore</footer>
+  <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
+
+          window.location.href = "./login.html";
+        });
+    </script>
 
 </body>
 </html>

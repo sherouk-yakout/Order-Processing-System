@@ -15,6 +15,8 @@
     <ul class="nav-links">
       <li><a href="customer-search.html">Search</a></li>
       <li><a href="customer-orders.html">Orders</a></li>
+      <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+
     </ul>
   </nav>
 
@@ -46,5 +48,18 @@
   </main>
 
   <footer class="footer">© 2025 Bookstore</footer>
+  <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
+
+          window.location.href = "./login.html";
+        });
+    </script>
 </body>
 </html>

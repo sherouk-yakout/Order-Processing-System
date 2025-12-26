@@ -4,10 +4,7 @@
   <title>Admin Reports</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="js/main.js"></script>
-
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script src="js/admin-reports.js" defer></script>
 </head>
 
@@ -16,6 +13,7 @@
   <nav class="navbar">
     <a href="admin-dashboard.html" class="logo">📊 Admin Reports</a>
     <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
   </nav>
 
   <main class="container fade-in">
@@ -77,6 +75,18 @@
   </main>
 
   <footer class="footer">© 2025 Admin Reports</footer>
+  <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
 
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
+
+          window.location.href = "./login.html";
+        });
+    </script>
 </body>
 </html>

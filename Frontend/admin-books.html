@@ -12,13 +12,13 @@
   <nav class="navbar">
     <a href="admin-dashboard.html" class="logo">📚 Admin Panel</a>
     <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+    <a href="#" class="nav-link logout" id="logoutBtn">Logout</a>
   </nav>
 
   <main class="container fade-in">
 
     <h2>📘 Manage Books</h2>
 
-    <!-- ADD / EDIT FORM -->
     <section class="card form-card">
       <h3 id="formTitle">Add New Book</h3>
 
@@ -38,14 +38,11 @@
           <input type="number" id="threshold" placeholder="Threshold" required>
         </div>
 
-        <!-- PREVIEW COVER -->
         <img id="coverPreview" class="cover-preview hidden" />
 
         <button class="btn primary-btn" type="submit">💾 Save Book</button>
       </form>
     </section>
-
-    <!-- BOOK LIST TABLE -->
     <section class="card">
       <h3>📚 Books Inventory</h3>
 
@@ -70,6 +67,18 @@
   </main>
 
   <footer class="footer">© 2025 Admin Books</footer>
+  <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
 
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
+
+          window.location.href = "./login.html";
+        });
+    </script>
 </body>
 </html>

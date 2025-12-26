@@ -1,40 +1,54 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Admin - Replenishment Orders</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/main.js"></script>
-  <script src="js/admin-orders.js" defer></script>
-</head>
+  <head>
+    <title>Admin - Replenishment Orders</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/main.js"></script>
+    <script src="js/admin-orders.js" defer></script>
+  </head>
 
-<body onload="requireAuth('admin')">
+  <body onload="requireAuth('admin')">
+    <nav class="navbar">
+      <a href="admin-dashboard.html" class="logo">📦 Replenishment Orders</a>
+      <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
 
-  <nav class="navbar">
-    <a href="admin-dashboard.html" class="logo">📦 Replenishment Orders</a>
-    <button id="themeToggle" class="btn secondary-btn">🌙 Dark Mode</button>
+      <ul class="nav-links">
+        <li><a href="admin-books.html">Books</a></li>
+        <li><a href="admin-reports.html">Reports</a></li>
+        <li><a href="#" class="nav-link logout" id="logoutBtn">Logout</a></li>
+      </ul>
+    </nav>
 
-    <ul class="nav-links">
-      <li><a href="admin-books.html">Books</a></li>
-      <li><a href="admin-reports.html">Reports</a></li>
-    </ul>
-  </nav>
+    <main class="container fade-in">
+      <h2>📦 Replenishment Orders</h2>
 
-  <main class="container fade-in">
+      <!-- FILTERS -->
+      <div class="filters">
+        <button class="btn small-btn" onclick="filterOrders('all')">All</button>
+        <button class="btn small-btn" onclick="filterOrders('pending')">
+          Pending
+        </button>
+        <button class="btn small-btn" onclick="filterOrders('completed')">
+          Completed
+        </button>
+      </div>
 
-    <h2>📦 Replenishment Orders</h2>
+      <div id="ordersContainer" class="orders-grid"></div>
+    </main>
 
-    <!-- FILTERS -->
-    <div class="filters">
-      <button class="btn small-btn" onclick="filterOrders('all')">All</button>
-      <button class="btn small-btn" onclick="filterOrders('pending')">Pending</button>
-      <button class="btn small-btn" onclick="filterOrders('completed')">Completed</button>
-    </div>
+    <footer class="footer">© 2025 Admin Orders</footer>
+    <script>
+      document
+        .getElementById("logoutBtn")
+        ?.addEventListener("click", function (e) {
+          e.preventDefault();
 
-    <div id="ordersContainer" class="orders-grid"></div>
+          localStorage.removeItem("user_id");
+          localStorage.removeItem("username");
+          localStorage.removeItem("role");
 
-  </main>
-
-  <footer class="footer">© 2025 Admin Orders</footer>
-
-</body>
+          window.location.href = "./login.html";
+        });
+    </script>
+  </body>
 </html>
