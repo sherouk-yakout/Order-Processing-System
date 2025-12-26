@@ -1,134 +1,149 @@
-const CART_API = "http://localhost:3000/cart";
-const ORDER_API = "http://localhost:3000/orders";
+const API_BASE = "http://localhost:3000";
 
-// Fetch Google Books image
-async function getBookImage(isbn) {
-  try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`
-    );
-    const data = await res.json();
-
-    if (data.items && data.items[0].volumeInfo?.imageLinks?.thumbnail) {
-      return data.items[0].volumeInfo.imageLinks.thumbnail;
-    }
-  } catch (err) {
-    console.error("Image fetch failed:", err);
-  }
-
-  return "https://via.placeholder.com/150?text=No+Image";
-}
-
-document.addEventListener("DOMContentLoaded", loadCart);
+document.addEventListener("DOMContentLoaded", () => {
+  loadCart();
+});
 
 async function loadCart() {
-  const user_id = localStorage.getItem("user_id");
-  const res = await fetch(`${CART_API}/${user_id}`);
-  const items = await res.json();
-
+  const cart_id = localStorage.getItem("cart_id");
   const container = document.getElementById("cartContainer");
   const summary = document.getElementById("cartSummary");
-  const totalSpan = document.getElementById("totalPrice");
+  const totalEl = document.getElementById("totalPrice");
 
-  container.innerHTML = "";
-  let total = 0;
+  if (!container) return;
 
-  if (items.length === 0) {
-    summary.classList.add("hidden");
-    container.innerHTML = "<p>Your cart is empty 🛒</p>";
+  if (!cart_id) {
+    container.innerHTML = `<p style="color:red;">Missing cart_id. Please login again.</p>`;
+    if (summary) summary.classList.add("hidden");
     return;
   }
 
-  summary.classList.remove("hidden");
+  container.innerHTML = "Loading cart...";
 
-  for (const item of items) {
-    const image = await getBookImage(item.isbn);
-    total += item.price * item.quantity;
+  try {
+    const res = await fetch(`${API_BASE}/cart/${encodeURIComponent(cart_id)}`);
+    const raw = await res.text();
+    let items = [];
+    try { items = JSON.parse(raw); } catch {}
 
-    container.innerHTML += `
-      <div class="card cart-item">
-        
-        <img src="${image}" class="cart-img" />
+    if (!res.ok) throw new Error(items?.error || raw || "Failed to load cart");
 
-        <div class="cart-info">
-          <h3>${item.title}</h3>
-          <p><strong>Price:</strong> $${item.price}</p>
+    if (!Array.isArray(items) || items.length === 0) {
+      container.innerHTML = `<p>Your cart is empty.</p>`;
+      if (summary) summary.classList.add("hidden");
+      if (totalEl) totalEl.textContent = "0";
+      return;
+    }
+
+    // Render items
+    container.innerHTML = "";
+    let total = 0;
+
+    for (const it of items) {
+      const isbn = it.isbn;
+      const title = it.title || isbn;
+      const qty = Number(it.qty || 0);
+      const price = Number(it.price || 0);
+
+      total += qty * price;
+
+      container.innerHTML += `
+        <div class="card fade-in">
+          <h3>${escapeHtml(title)}</h3>
+          <p><strong>ISBN:</strong> ${escapeHtml(isbn)}</p>
+          <p><strong>Qty:</strong> ${qty}</p>
+          <p><strong>Unit Price:</strong> $${price.toFixed(2)}</p>
+          <p><strong>Subtotal:</strong> $${(qty * price).toFixed(2)}</p>
+          <button class="btn secondary-btn" onclick="removeItem('${escapeAttr(isbn)}')">Remove</button>
         </div>
+      `;
+    }
 
-        <div class="qty-controls">
-          <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})">−</button>
-          <span class="qty">${item.quantity}</span>
-          <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
-        </div>
-
-        <button class="btn secondary-btn remove-btn" onclick="removeItem(${item.id})">❌</button>
-
-      </div>
-    `;
+    if (totalEl) totalEl.textContent = total.toFixed(2);
+    if (summary) summary.classList.remove("hidden");
+  } catch (e) {
+    container.innerHTML = `<p style="color:red;">${escapeHtml(e.message)}</p>`;
+    if (summary) summary.classList.add("hidden");
   }
-
-  totalSpan.textContent = total.toFixed(2);
 }
 
-// Update quantity
-async function updateQuantity(cartId, newQty) {
-  if (newQty <= 0) return removeItem(cartId);
+async function removeItem(isbn) {
+  const cart_id = localStorage.getItem("cart_id");
+  if (!cart_id) return alert("Missing cart_id. Please login again.");
 
-  const res = await fetch(`${CART_API}/update/${cartId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ quantity: newQty })
-  });
+  try {
+    const res = await fetch(
+      `${API_BASE}/cart/${encodeURIComponent(cart_id)}/${encodeURIComponent(isbn)}`,
+      { method: "DELETE" }
+    );
 
-  if (res.ok) loadCart();
-  else alert("Error updating quantity ❌");
-}
+    const raw = await res.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
 
-// Remove item
-async function removeItem(cartId) {
-  const res = await fetch(`${CART_API}/remove/${cartId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(data.error || raw || "Remove failed");
 
-  if (res.ok) loadCart();
-  else alert("Error removing item ❌");
-}
-
-// Open checkout
-function openCheckout() {
-  document.getElementById("checkoutModal").classList.remove("hidden");
-}
-
-// Close modal
-function closeCheckout() {
-  document.getElementById("checkoutModal").classList.add("hidden");
-}
-
-// Validate credit card
-function validatePayment() {
-  const num = document.getElementById("cardNumber").value;
-  const exp = document.getElementById("expiry").value;
-
-  const cardOk = /^\d{16}$/.test(num);
-  const expOk = /^(0[1-9]|1[0-2])\/\d{2}$/.test(exp);
-
-  return cardOk && expOk;
-}
-
-// Checkout
-async function checkout() {
-  if (!validatePayment()) {
-    alert("Invalid payment details ❌");
-    return;
-  }
-
-  const user_id = localStorage.getItem("user_id");
-  const res = await fetch(`${ORDER_API}/checkout/${user_id}`, { method: "POST" });
-  const data = await res.json();
-
-  if (res.ok) {
-    alert("Order placed successfully! 🎉");
-    closeCheckout();
     loadCart();
-  } else {
-    alert(data.error || "Checkout failed ❌");
+  } catch (e) {
+    alert(e.message);
   }
+}
+
+/* ========= CHECKOUT MODAL FUNCTIONS ========= */
+function openCheckout() {
+  const modal = document.getElementById("checkoutModal");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeCheckout() {
+  const modal = document.getElementById("checkoutModal");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function checkout() {
+  const cart_id = localStorage.getItem("cart_id");
+  const customer_username = localStorage.getItem("user_id");
+
+  const credit_card_number = (document.getElementById("cardNumber")?.value || "").trim();
+  const credit_card_expiry = (document.getElementById("expiry")?.value || "").trim();
+
+  if (!cart_id) return alert("Missing cart_id. Please login again.");
+  if (!customer_username) return alert("Missing user_id. Please login again.");
+
+  try {
+    const res = await fetch(`${API_BASE}/orders/checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cart_id: Number(cart_id),
+        customer_username,
+        credit_card_number,
+        credit_card_expiry
+      })
+    });
+
+    const raw = await res.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || raw || "Checkout failed");
+    }
+
+    alert(`Checkout successful ✔️ Order ID: ${data.order_id}`);
+    closeCheckout();
+
+    // Refresh cart (it gets cleared on backend)
+    loadCart();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+/* helpers */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+}
+function escapeAttr(s) {
+  return String(s).replace(/'/g, "\\'");
 }

@@ -26,17 +26,35 @@ router.post("/login", async (req, res) => {
 
     const user = rows[0];
 
+    // 🔹 get or create cart
+    const [carts] = await pool.execute(
+      "SELECT cart_id FROM Carts WHERE customer_username = ? ORDER BY cart_id DESC LIMIT 1",
+      [user.username]
+    );
+
+    let cart_id;
+    if (carts.length > 0) {
+      cart_id = carts[0].cart_id;
+    } else {
+      const [insertResult] = await pool.execute(
+        "INSERT INTO Carts(customer_username) VALUES (?)",
+        [user.username]
+      );
+      cart_id = insertResult.insertId;
+    }
+
     res.json({
       message: "Login successful",
       user_id: user.username,
       role: user.role,
+      cart_id
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// -------------------- SIGNUP (/auth/signup) --------------------
 router.post("/signup", async (req, res) => {
   const {
     username,

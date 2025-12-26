@@ -24,6 +24,8 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
             localStorage.setItem("user_id", data.user_id);
             localStorage.setItem("username", data.user_id);
             localStorage.setItem("role", role);
+            localStorage.setItem("cart_id", data.cart_id);
+
 
             alert("Login successful ✔️");
 

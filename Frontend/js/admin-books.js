@@ -1,150 +1,145 @@
-const API = "http://localhost:3000/books";
-
-/* ===== FETCH GOOGLE BOOK IMAGE ===== */
-async function getBookImage(isbn) {
-  try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`
-    );
-    const data = await res.json();
-
-    if (data.items && data.items[0].volumeInfo?.imageLinks?.thumbnail) {
-      return data.items[0].volumeInfo.imageLinks.thumbnail;
-    }
-  } catch (err) {
-    console.error("Image fetch failed:", err);
-  }
-
-  return "https://via.placeholder.com/120x160?text=No+Image";
-}
+const API_BASE = window.API_BASE || "http://localhost:3000";
+const API_BOOKS = `${API_BASE}/books`;
 
 document.addEventListener("DOMContentLoaded", () => {
   loadBooks();
 
-  document.getElementById("bookForm").addEventListener("submit", saveBook);
+  const addForm = document.getElementById("addBookForm");
+  if (addForm) addForm.addEventListener("submit", addBook);
 
-  // Live preview image when ISBN changes
-  document.getElementById("isbn").addEventListener("input", updatePreview);
+  const editForm = document.getElementById("editBookForm");
+  if (editForm) editForm.addEventListener("submit", saveEdit);
 });
 
-/* ===== LIVE COVER PREVIEW ===== */
-async function updatePreview() {
-  const isbn = document.getElementById("isbn").value;
-  const img = document.getElementById("coverPreview");
-
-  if (!isbn) return img.classList.add("hidden");
-
-  const url = await getBookImage(isbn);
-  img.src = url;
-  img.classList.remove("hidden");
-}
-
-/* ===== LOAD BOOK LIST ===== */
 async function loadBooks() {
-  const res = await fetch(API);
-  const books = await res.json();
+  const out = document.getElementById("booksTableBody") || document.getElementById("booksList");
+  if (!out) return;
 
-  const list = document.getElementById("bookList");
-  list.innerHTML = "";
+  out.innerHTML = "Loading...";
 
-  for (const book of books) {
-    const img = await getBookImage(book.isbn);
+  try {
+    const res = await fetch(API_BOOKS);
+    const raw = await res.text();
+    let data = [];
+    try { data = JSON.parse(raw); } catch {}
 
-    const stockClass =
-      book.stock <= book.threshold ? "stock-low" : "stock-ok";
+    if (!res.ok) throw new Error(data.error || raw || "Failed to load books");
+    const books = Array.isArray(data) ? data : [];
 
-    list.innerHTML += `
-      <tr class="fade-in">
-        <td><img src="${img}" class="table-cover" /></td>
-        <td>${book.isbn}</td>
-        <td>${book.title}</td>
-        <td>${book.authors}</td>
-        <td>${book.category}</td>
-        <td>$${book.price}</td>
-        <td class="${stockClass}">${book.stock}</td>
-        <td>${book.threshold}</td>
+    if (books.length === 0) {
+      out.innerHTML = "<tr><td colspan='9'>No books found.</td></tr>";
+      return;
+    }
 
-        <td>
-          <button class="btn small-btn" onclick="editBook(${book.id})">✏ Edit</button>
-          <button class="btn danger-btn small-btn" onclick="deleteBook(${book.id})">🗑 Delete</button>
-        </td>
-      </tr>
-    `;
+    out.innerHTML = "";
+    for (const b of books) {
+      // backend fields: isbn,title,category,publish_year,price,stock,publisher,author
+      out.innerHTML += `
+        <tr>
+          <td>${escapeHtml(b.isbn)}</td>
+          <td>${escapeHtml(b.title)}</td>
+          <td>${escapeHtml(b.author || "—")}</td>
+          <td>${escapeHtml(b.publisher || "—")}</td>
+          <td>${escapeHtml(String(b.publish_year ?? "—"))}</td>
+          <td>${escapeHtml(b.category || "—")}</td>
+          <td>${escapeHtml(String(b.price ?? "—"))}</td>
+          <td>${escapeHtml(String(b.stock ?? "—"))}</td>
+          <td>
+            <button class="btn" onclick="openEdit('${escapeAttr(b.isbn)}')">Edit</button>
+          </td>
+        </tr>
+      `;
+    }
+  } catch (e) {
+    out.innerHTML = `<tr><td colspan="9" style="color:red;">${escapeHtml(e.message)}</td></tr>`;
   }
 }
 
-/* ===== SAVE OR UPDATE BOOK ===== */
-async function saveBook(e) {
+async function addBook(e) {
   e.preventDefault();
 
-  const id = document.getElementById("bookId").value;
+  // These IDs must match your HTML inputs
+  const isbn = val("isbn");
+  const title = val("title");
+  const category = val("category");
+  const publish_year = Number(val("publish_year") || 0);
+  const price = Number(val("price") || 0);
+  const stock = Number(val("stock") || 0);
+  const threshold = Number(val("threshold") || 0);
+  const pub_id = Number(val("pub_id") || 0); // backend expects pub_id
 
-  const bookData = {
-    isbn: isbn.value,
-    title: title.value,
-    authors: authors.value,
-    publisher: publisher.value,
-    year: year.value,
-    category: category.value,
-    price: price.value,
-    stock: stock.value,
-    threshold: threshold.value,
-  };
+  try {
+    const res = await fetch(API_BOOKS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isbn, title, category, publish_year, price, stock, threshold, pub_id })
+    });
 
-  const res = await fetch(id ? `${API}/${id}` : API, {
-    method: id ? "PUT" : "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bookData),
-  });
+    const raw = await res.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
 
-  if (res.ok) {
-    alert(id ? "Book updated!" : "Book added!");
-    resetForm();
+    if (!res.ok) throw new Error(data.error || raw || "Add book failed");
+    alert("Book added ✔️");
+    e.target.reset();
     loadBooks();
-  } else {
-    alert("Error saving book ❌");
+  } catch (err) {
+    alert(err.message);
   }
 }
 
-/* ===== RESET FORM ===== */
-function resetForm() {
-  document.getElementById("bookForm").reset();
-  document.getElementById("bookId").value = "";
-  document.getElementById("formTitle").textContent = "Add New Book";
-  document.getElementById("coverPreview").classList.add("hidden");
+function openEdit(isbn) {
+  const editIsbn = document.getElementById("edit_isbn");
+  if (editIsbn) editIsbn.value = isbn;
+
+  // If you already have modal, open it here.
+  const modal = document.getElementById("editModal");
+  if (modal) modal.classList.remove("hidden");
 }
 
-/* ===== EDIT BOOK ===== */
-async function editBook(id) {
-  const res = await fetch(`${API}/${id}`);
-  const book = await res.json();
+async function saveEdit(e) {
+  e.preventDefault();
 
-  document.getElementById("formTitle").textContent = "Edit Book";
-  document.getElementById("bookId").value = book.id;
+  const isbn = val("edit_isbn");
+  const title = val("edit_title");
+  const category = val("edit_category");
+  const publish_year = Number(val("edit_publish_year") || 0);
+  const price = Number(val("edit_price") || 0);
+  const stock = Number(val("edit_stock") || 0);
+  const threshold = Number(val("edit_threshold") || 0);
+  const pub_id = Number(val("edit_pub_id") || 0);
 
-  isbn.value = book.isbn;
-  title.value = book.title;
-  authors.value = book.authors;
-  publisher.value = book.publisher;
-  year.value = book.year;
-  category.value = book.category;
-  price.value = book.price;
-  stock.value = book.stock;
-  threshold.value = book.threshold;
+  try {
+    const res = await fetch(`${API_BOOKS}/${encodeURIComponent(isbn)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, category, publish_year, price, stock, threshold, pub_id })
+    });
 
-  updatePreview();
-}
+    const raw = await res.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
 
-/* ===== DELETE BOOK ===== */
-async function deleteBook(id) {
-  if (!confirm("Delete this book?")) return;
+    if (!res.ok) throw new Error(data.error || raw || "Update failed");
+    alert("Book updated ✔️");
 
-  const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+    const modal = document.getElementById("editModal");
+    if (modal) modal.classList.add("hidden");
 
-  if (res.ok) {
-    alert("Book deleted ✔️");
     loadBooks();
-  } else {
-    alert("Error deleting book ❌");
+  } catch (err) {
+    alert(err.message);
   }
+}
+
+/* helpers */
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+}
+function escapeAttr(s) {
+  return String(s).replace(/'/g, "\\'");
 }

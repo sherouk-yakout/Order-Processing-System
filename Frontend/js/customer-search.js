@@ -18,27 +18,20 @@ document.addEventListener("DOMContentLoaded", () => {
   searchBooks(); // load all initially
 });
 
-/* === Fetch Google Books Thumbnail === */
 async function getBookImage(isbn) {
-  try {
-    const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`
-    );
-    const data = await res.json();
+  const clean = String(isbn || "").replace(/[^0-9X]/gi, "");
+  if (!clean) return "https://via.placeholder.com/150?text=No+Image";
 
-    if (data.items && data.items[0]?.volumeInfo?.imageLinks?.thumbnail) {
-      return data.items[0].volumeInfo.imageLinks.thumbnail;
-    }
-  } catch (err) {
-    console.error("Image fetch failed:", err);
-  }
-
-  return "https://via.placeholder.com/150?text=No+Image";
+  return `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(
+    clean
+  )}-M.jpg`;
 }
 
-/* === Main search function === */
+// Main search function
 async function searchBooks() {
-  const query = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+  const query = (document.getElementById("searchInput").value || "")
+    .toLowerCase()
+    .trim();
   const categoryValue = document.getElementById("categoryFilter").value || "";
 
   const skeleton = document.getElementById("loadingSkeleton");
@@ -48,17 +41,22 @@ async function searchBooks() {
   skeleton.innerHTML = "";
   output.innerHTML = "";
   skeleton.classList.remove("hidden");
-  for (let i = 0; i < 6; i++) skeleton.innerHTML += `<div class="skeleton-card"></div>`;
+  for (let i = 0; i < 6; i++)
+    skeleton.innerHTML += `<div class="skeleton-card"></div>`;
 
   let books = [];
   try {
     const res = await fetch(API_BOOKS);
     const raw = await res.text();
     let data = [];
-    try { data = JSON.parse(raw); } catch {}
+    try {
+      data = JSON.parse(raw);
+    } catch {}
 
     if (!res.ok) {
-      throw new Error((data && data.error) ? data.error : raw || "Books API failed");
+      throw new Error(
+        data && data.error ? data.error : raw || "Books API failed"
+      );
     }
 
     books = Array.isArray(data) ? data : [];
@@ -71,7 +69,7 @@ async function searchBooks() {
 
   const filtered = books.filter((book) => {
     const title = (book.title || "").toLowerCase();
-    const author = (book.author || "").toLowerCase();      // backend: author
+    const author = (book.author || "").toLowerCase(); // backend: author
     const isbn = (book.isbn || "").toLowerCase();
     const publisher = (book.publisher || "").toLowerCase();
 
@@ -81,7 +79,8 @@ async function searchBooks() {
       isbn.includes(query) ||
       publisher.includes(query);
 
-    const matchesCategory = categoryValue === "" || book.category === categoryValue;
+    const matchesCategory =
+      categoryValue === "" || book.category === categoryValue;
     return matchesText && matchesCategory;
   });
 
@@ -98,12 +97,13 @@ async function searchBooks() {
     const stockText = stock > 0 ? "In Stock" : "Out of Stock";
 
     const imageUrl = await getBookImage(book.isbn);
-    const year = (book.publish_year ?? "—");
+    const year = book.publish_year ?? "—";
     const price = Number(book.price || 0).toFixed(2);
 
     output.innerHTML += `
       <div class="card book-card fade-in">
-        <img src="${imageUrl}" class="book-cover" />
+      <img src="${imageUrl}" class="book-cover"
+      onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=No+Image';" />
 
         <div class="book-info">
           <h3>${book.title || "Untitled"}</h3>
@@ -145,13 +145,15 @@ async function addToCart(isbn, price) {
         cart_id,
         isbn,
         qty: 1,
-        price: Number(price)
+        price: Number(price),
       }),
     });
 
     const raw = await res.text();
     let data = {};
-    try { data = JSON.parse(raw); } catch {}
+    try {
+      data = JSON.parse(raw);
+    } catch {}
 
     if (res.ok) {
       alert("Item added to cart ✔️");
