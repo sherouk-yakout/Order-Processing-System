@@ -19,98 +19,128 @@ async function getBookImage(isbn) {
 
   return "https://via.placeholder.com/150?text=No+Image";
 }
-
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   const userName = localStorage.getItem("username") || "Customer";
   const userId = localStorage.getItem("user_id");
 
   document.getElementById("customerName").textContent = userName;
 
-  // Load stats + recommendations
+  if (!userId) {
+    console.warn("Missing user_id. Redirecting to login.");
+    window.location.href = "./login.html";
+    return;
+  }
+
   loadStats(userId);
   loadRecommendations(userId);
 });
 
-// ---- LOAD STATS ----
 async function loadStats(userId) {
-  // CART COUNT
-  const cartRes = await fetch(`${CART_API}/${userId}`);
-  const cartData = await cartRes.json();
-  document.getElementById("cartCount").textContent = cartData.length;
+  try {
+    const cartRes = await fetch(`${CART_API}/${userId}`);
+    const cartData = await cartRes.json();
+    document.getElementById("cartCount").textContent =
+      Array.isArray(cartData) ? cartData.length : 0;
 
-  // ORDER COUNT
-  const orderRes = await fetch(`${ORDER_API}/user/${userId}`);
-  const orderData = await orderRes.json();
-  document.getElementById("orderCount").textContent = orderData.length;
+    const orderRes = await fetch(`${ORDER_API}/user/${userId}`);
+    const orderData = await orderRes.json();
+    document.getElementById("orderCount").textContent =
+      Array.isArray(orderData) ? orderData.length : 0;
 
-  // CATEGORY COUNT
-  const booksRes = await fetch(BOOK_API);
-  const allBooks = await booksRes.json();
+    const booksRes = await fetch(BOOK_API);
+    const allBooks = await booksRes.json();
 
-  const uniqueCategories = [...new Set(allBooks.map(b => b.category))];
-  document.getElementById("categoryCount").textContent = uniqueCategories.length;
+    const uniqueCategories = [
+      ...new Set((Array.isArray(allBooks) ? allBooks : []).map((b) => b.category).filter(Boolean))
+    ];
+    document.getElementById("categoryCount").textContent = uniqueCategories.length;
+  } catch (e) {
+    console.error("Stats error:", e);
+    document.getElementById("cartCount").textContent = 0;
+    document.getElementById("orderCount").textContent = 0;
+    document.getElementById("categoryCount").textContent = 0;
+  }
 }
-
-// ---- LOAD RECOMMENDED BOOKS ----
 async function loadRecommendations(userId) {
   const recBox = document.getElementById("recommendedContainer");
   recBox.innerHTML = "<p>Loading recommendations...</p>";
 
-  // 1. Check user's past orders
-  const orderRes = await fetch(`${ORDER_API}/user/${userId}`);
-  const orders = await orderRes.json();
+  try {
+    // Load orders (may or may not include items)
+    const orderRes = await fetch(`${ORDER_API}/user/${userId}`);
+    const orders = await orderRes.json();
 
-  // 2. Load all books
-  const bookRes = await fetch(BOOK_API);
-  const allBooks = await bookRes.json();
+    // Load all books
+    const bookRes = await fetch(BOOK_API);
+    const allBooks = await bookRes.json();
 
-  let recommendedCategory = null;
+    if (!Array.isArray(allBooks) || allBooks.length === 0) {
+      recBox.innerHTML = "<p>No books available for recommendations.</p>";
+      return;
+    }
 
-  if (orders.length > 0) {
-    // Pick most frequent purchased category
-    let categoryMap = {};
+    let recommendedCategory = null;
 
-    orders.forEach(order =>
-      order.items.forEach(item => {
-        categoryMap[item.category] =
-          (categoryMap[item.category] || 0) + item.quantity;
-      })
-    );
+    const categoryMap = {};
 
-    recommendedCategory = Object.keys(categoryMap).sort(
-      (a, b) => categoryMap[b] - categoryMap[a]
-    )[0];
-  } else {
-    // If no orders → pick most common category in store
-    let storeCategories = {};
+    if (Array.isArray(orders) && orders.length > 0) {
+      for (const order of orders) {
+        if (!order.items || !Array.isArray(order.items)) continue;
 
-    allBooks.forEach(book => {
-      storeCategories[book.category] =
-        (storeCategories[book.category] || 0) + 1;
-    });
+        for (const item of order.items) {
+          const cat = item.category;
+          const qty = Number(item.quantity || item.qty || 1);
+          if (!cat) continue;
+          categoryMap[cat] = (categoryMap[cat] || 0) + qty;
+        }
+      }
 
-    recommendedCategory = Object.keys(storeCategories).sort(
-      (a, b) => storeCategories[b] - storeCategories[a]
-    )[0];
-  }
+      const cats = Object.keys(categoryMap);
+      if (cats.length > 0) {
+        recommendedCategory = cats.sort((a, b) => categoryMap[b] - categoryMap[a])[0];
+      }
+    }
 
-  // Filter recommended books
-  const recommendedBooks = allBooks
-    .filter(book => book.category === recommendedCategory)
-    .slice(0, 6);
+    if (!recommendedCategory) {
+      const storeCategories = {};
+      for (const book of allBooks) {
+        const cat = book.category;
+        if (!cat) continue;
+        storeCategories[cat] = (storeCategories[cat] || 0) + 1;
+      }
+      const storeCats = Object.keys(storeCategories);
+      recommendedCategory = storeCats.length
+        ? storeCats.sort((a, b) => storeCategories[b] - storeCategories[a])[0]
+        : allBooks[0].category;
+    }
 
-  recBox.innerHTML = "";
+    const recommendedBooks = allBooks
+      .filter(b => b.category === recommendedCategory && Number(b.stock || 0) > 0)
+      .slice(0, 6);
 
-  for (let book of recommendedBooks) {
-    const img = await getBookImage(book.isbn);
+    if (recommendedBooks.length === 0) {
+      recBox.innerHTML = `<p>No in-stock recommendations for ${recommendedCategory}.</p>`;
+      return;
+    }
 
-    recBox.innerHTML += `
-      <div class="card rec-card">
-        <img src="${img}" class="book-cover" />
-        <h4>${book.title}</h4>
-        <p class="small">${book.authors}</p>
-        <p><strong>$${book.price}</strong></p>
-      </div>
-    `;
+    recBox.innerHTML = "";
+
+    for (const book of recommendedBooks) {
+      const img = await getBookImage(book.isbn);
+
+      recBox.innerHTML += `
+        <div class="card rec-card">
+          <img src="${img}" class="book-cover"
+            onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=No+Image';" />
+          <h4>${book.title || "Untitled"}</h4>
+          <p class="small">${book.author || "—"}</p>
+          <p><strong>$${Number(book.price || 0).toFixed(2)}</strong></p>
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error("Recommendations error:", err);
+    recBox.innerHTML = "<p>Could not load recommendations.</p>";
   }
 }
+
