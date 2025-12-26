@@ -4,7 +4,7 @@ const API_BOOKS = `${API_BASE}/books`;
 document.addEventListener("DOMContentLoaded", () => {
   loadBooks();
 
-  const addForm = document.getElementById("addBookForm");
+  const addForm = document.getElementById("bookForm");
   if (addForm) addForm.addEventListener("submit", addBook);
 
   const editForm = document.getElementById("editBookForm");
@@ -61,18 +61,20 @@ async function addBook(e) {
   // These IDs must match your HTML inputs
   const isbn = val("isbn");
   const title = val("title");
+  const author = val("authors");
+   const publisher = val("publisher");
+  const publish_year = Number(val("year") || 0);
   const category = val("category");
-  const publish_year = Number(val("publish_year") || 0);
   const price = Number(val("price") || 0);
   const stock = Number(val("stock") || 0);
   const threshold = Number(val("threshold") || 0);
-  const pub_id = Number(val("pub_id") || 0); // backend expects pub_id
+  
 
   try {
     const res = await fetch(API_BOOKS, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isbn, title, category, publish_year, price, stock, threshold, pub_id })
+      body: JSON.stringify({ isbn, title, category, publish_year, price, stock, threshold,publisher })
     });
 
     const raw = await res.text();
@@ -113,7 +115,7 @@ async function saveEdit(e) {
     const res = await fetch(`${API_BOOKS}/${encodeURIComponent(isbn)}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, category, publish_year, price, stock, threshold, pub_id })
+      body: JSON.stringify({ title, category, publish_year, price, stock, threshold, publisher})
     });
 
     const raw = await res.text();

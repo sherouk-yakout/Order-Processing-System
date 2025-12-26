@@ -67,31 +67,62 @@ router.get('/', async (req, res) => {
 
 // Add new book (Admin only)
 router.post('/', async (req, res) => {
-    const { isbn, title, category, publish_year, price, stock, threshold, pub_id } = req.body;
-    try {
-        await pool.execute(
-            'INSERT INTO Books(isbn, title, category, publish_year, price, stock, threshold, pub_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [isbn, title, category, publish_year, price, stock, threshold, pub_id]
-        );
-        res.json({ message: 'Book added successfully' });
-    } catch(err) {
-        res.status(500).json({ error: err.message });
+  const { isbn, title, category, publish_year, price, stock, threshold, publisher } = req.body;
+
+  try {
+    // 1️⃣ Check if publisher exists
+    const [pubRows] = await pool.execute('SELECT pub_id FROM Publishers WHERE pub_name = ?', [publisher]);
+    let pub_id;
+
+    if (pubRows.length > 0) {
+      pub_id = pubRows[0].pub_id; // existing publisher
+    } else {
+      // 2️⃣ Add new publisher
+      const [result] = await pool.execute('INSERT INTO Publishers(pub_name) VALUES (?)', [publisher]);
+      pub_id = result.insertId;
     }
+
+    // 3️⃣ Insert book with the correct pub_id
+    await pool.execute(
+      'INSERT INTO Books(isbn, title, category, publish_year, price, stock, threshold, pub_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [isbn, title, category, publish_year, price, stock, threshold, pub_id]
+    );
+
+    res.json({ message: 'Book added successfully' });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
+
 
 // Update book (Admin)
 router.put('/:isbn', async (req, res) => {
-    const { isbn } = req.params;
-    const { title, category, publish_year, price, stock, threshold, pub_id } = req.body;
-    try {
-        await pool.execute(
-            'UPDATE Books SET title=?, category=?, publish_year=?, price=?, stock=?, threshold=?, pub_id=? WHERE isbn=?',
-            [title, category, publish_year, price, stock, threshold, pub_id, isbn]
-        );
-        res.json({ message: 'Book updated successfully' });
-    } catch(err) {
-        res.status(500).json({ error: err.message });
+  const { isbn } = req.params;
+  const { title, category, publish_year, price, stock, threshold, publisher } = req.body;
+
+  try {
+    // Check if publisher exists
+    const [pubRows] = await pool.execute('SELECT pub_id FROM Publishers WHERE pub_name = ?', [publisher]);
+    let pub_id;
+
+    if (pubRows.length > 0) {
+      pub_id = pubRows[0].pub_id;
+    } else {
+      const [result] = await pool.execute('INSERT INTO Publishers(pub_name) VALUES (?)', [publisher]);
+      pub_id = result.insertId;
     }
+
+    // Update book
+    await pool.execute(
+      'UPDATE Books SET title=?, category=?, publish_year=?, price=?, stock=?, threshold=?, pub_id=? WHERE isbn=?',
+      [title, category, publish_year, price, stock, threshold, pub_id, isbn]
+    );
+
+    res.json({ message: 'Book updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
