@@ -1,136 +1,106 @@
 const ORDERS_API = "http://localhost:3000/orders";
-
-function orderIdOf(o) {
-  return o.rep_order_id;
-}
-
-// Fetch Google Books thumbnail
-async function getBookImage(isbn) {
-  try {
-    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`);
-    const data = await res.json();
-
-    if (data.items && data.items[0].volumeInfo?.imageLinks?.thumbnail) {
-      return data.items[0].volumeInfo.imageLinks.thumbnail;
-    }
-  } catch (err) {
-    console.error("Image fetch failed:", err);
-  }
-  return "https://via.placeholder.com/120x160?text=No+Image";
-}
-
 let allOrders = [];
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadReplenishmentOrders();
+document.addEventListener("DOMContentLoaded", () => {
+  loadReplenishmentOrders();
 });
 
 async function loadReplenishmentOrders() {
-  const res = await fetch(ORDERS_API);
-  const data = await res.json();
-
-  allOrders = (Array.isArray(data) ? data : []).map(o => ({
-    ...o,
-    status: (o.status === "confirmed" || o.status === "received") ? "completed" : o.status
-  }));
-
-  renderOrders(allOrders);
+  try {
+    const res = await fetch(ORDERS_API);
+    const data = await res.json();
+    allOrders = Array.isArray(data) ? data : [];
+    renderOrders(allOrders);
+  } catch (err) {
+    console.error("Failed to fetch orders", err);
+  }
 }
 
-async function renderOrders(orders) {
+function renderOrders(orders) {
   const container = document.getElementById("ordersContainer");
   if (!container) return;
-
   container.innerHTML = "";
 
-  if (!orders || orders.length === 0) {
-    container.innerHTML = "<p>No replenishment orders found 📭</p>";
+  if (orders.length === 0) {
+    container.innerHTML = "<p>No orders found for this view 📭</p>";
     return;
   }
 
-  for (const order of orders) {
-    const id = orderIdOf(order);
-    const img = await getBookImage(order.isbn);
-
-    const statusClass =
-      order.status === "pending" ? "status-pending" : "status-completed";
-
-    const actionButton =
-      order.status === "pending"
-        ? `<button class="btn primary-btn" onclick="confirmOrder(${id})">Confirm ✔️</button>`
-        : `<p class="success-text">Order confirmed ✔️</p>`;
+  orders.forEach(order => {
+    const id = order.rep_order_id;
+    const isPending = order.status === 'pending';
+    
+    // UI Label logic
+    const statusLabel = isPending ? "Pending" : "Confirmed";
+    const statusClass = isPending ? "status-pending" : "status-completed";
 
     container.innerHTML += `
       <div class="card order-card fade-in">
-
         <div class="order-header" onclick="toggleOrder(${id})">
           <div>
-            <h3>Order #${id}</h3>
-            <p>${order.created_at ? new Date(order.created_at).toLocaleDateString() : ""}</p>
+            <h3>Order #${id} - ${escapeHtml(order.title)}</h3>
+            <p>Created: ${new Date(order.created_at).toLocaleDateString()}</p>
           </div>
-
-          <span class="order-status ${statusClass}">${order.status}</span>
-
+          <span class="order-status ${statusClass}">${statusLabel}</span>
           <span id="arrow-${id}" class="arrow">▼</span>
         </div>
 
         <div id="items-${id}" class="order-details hidden">
-
           <div class="order-detail-item">
-            <img src="${img}" class="order-img" />
-            <div>
-              <p><strong>Title:</strong> ${escapeHtml(order.title ?? "")}</p>
-              <p><strong>Quantity:</strong> ${escapeHtml(String(order.qty ?? ""))}</p>
-              <p><strong>ISBN:</strong> ${escapeHtml(order.isbn ?? "")}</p>
+            <div class="order-info">
+              <p><strong>ISBN:</strong> ${order.isbn}</p>
+              <p><strong>Restock Quantity:</strong> ${order.qty}</p>
+              <p><strong>Publisher ID:</strong> ${order.pub_id}</p>
             </div>
           </div>
-
           <div class="order-actions">
-            ${actionButton}
+            ${isPending ? 
+              `<button class="btn primary-btn" onclick="confirmOrder(${id})">Confirm & Add to Stock ✔️</button>` : 
+              `<p class="success-text">Stock Added on ${new Date(order.confirmed_at).toLocaleDateString()}</p>`
+            }
           </div>
-
         </div>
-
       </div>
     `;
+  });
+}
+
+async function confirmOrder(orderId) {
+  if (!confirm("Confirm receipt? This will automatically increase book stock.")) return;
+
+  try {
+    const res = await fetch(`${ORDERS_API}/confirm/${orderId}`, { method: "PUT" });
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Success: " + data.message);
+      loadReplenishmentOrders(); // Refresh list
+    } else {
+      alert("Error: " + data.error);
+    }
+  } catch (err) {
+    alert("Connection error to backend.");
+  }
+}
+
+function filterOrders(type) {
+  if (type === "all") {
+    renderOrders(allOrders);
+  } else if (type === "completed") {
+    // We filter for 'confirmed' in DB but it represents 'completed' in UI
+    renderOrders(allOrders.filter(o => o.status === "confirmed"));
+  } else {
+    renderOrders(allOrders.filter(o => o.status === "pending"));
   }
 }
 
 function toggleOrder(id) {
   const box = document.getElementById(`items-${id}`);
   const arrow = document.getElementById(`arrow-${id}`);
-  if (!box || !arrow) return;
-
   box.classList.toggle("hidden");
   arrow.textContent = box.classList.contains("hidden") ? "▼" : "▲";
 }
 
-async function confirmOrder(orderId) {
-  if (!confirm("Confirm this replenishment order?")) return;
-
-  const res = await fetch(`${ORDERS_API}/confirm/${orderId}`, { method: "PUT" });
-  const data = await res.json().catch(() => ({}));
-
-  if (res.ok) {
-    alert("Order confirmed! Stock updated ✔️");
-    await loadReplenishmentOrders();
-  } else {
-    alert((data && data.error) ? data.error : "Error confirming order ❌");
-  }
-}
-
-function filterOrders(type) {
-  if (type === "all") return renderOrders(allOrders);
-  const filtered = allOrders.filter(o => o.status === type);
-  renderOrders(filtered);
-}
-
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, m => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[m]));
+    return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
 }

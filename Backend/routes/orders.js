@@ -167,13 +167,12 @@ router.post("/checkout", async (req, res) => {
   }
 });
 
+// Backend/routes/orders.js - update the confirm route
 router.put("/confirm/:id", async (req, res) => {
   const repOrderId = req.params.id;
 
   try {
-    // We simply update the status to 'confirmed'. 
-    // The MySQL trigger 'confirm_publisher_order' will detect this 
-    // and automatically add NEW.qty to Books.stock.
+    // Only update if currently 'pending'
     const [result] = await pool.execute(
       `UPDATE Publisher_orders 
        SET status = 'confirmed', confirmed_at = NOW() 
@@ -182,10 +181,10 @@ router.put("/confirm/:id", async (req, res) => {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(400).json({ error: "Order not found or already confirmed." });
+      return res.status(400).json({ error: "Order already confirmed or not found." });
     }
 
-    res.json({ message: "Order confirmed! Stock updated automatically via database trigger." });
+    res.json({ message: "Stock updated successfully!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
