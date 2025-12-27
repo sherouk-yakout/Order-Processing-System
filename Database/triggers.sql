@@ -26,7 +26,7 @@ BEGIN
         WHERE isbn = NEW.isbn AND status = 'pending';
         
         IF pending_count = 0 THEN
-            INSERT INTO Publisher_orders (isbn, pub_id, qty, status, created_at)
+            INSERT INTO Publisher_orders (isbn, pub_id, qty, `status`, created_at)
             VALUES (NEW.isbn, NEW.pub_id, 50, 'pending', CURRENT_TIMESTAMP);
         END IF;
     END IF;
