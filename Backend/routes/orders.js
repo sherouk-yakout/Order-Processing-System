@@ -167,59 +167,27 @@ router.post("/checkout", async (req, res) => {
   }
 });
 
-// Confirm replenishment order (Admin)
 router.put("/confirm/:id", async (req, res) => {
   const repOrderId = req.params.id;
 
-  const conn = await pool.getConnection();
   try {
-    await conn.beginTransaction();
-
-    // lock the order row so 2 confirms can't run in parallel
-    const [rows] = await conn.execute(
-      `SELECT rep_order_id, isbn, qty, status
-       FROM Publisher_orders
-       WHERE rep_order_id = ?
-       FOR UPDATE`,
+    // We simply update the status to 'confirmed'. 
+    // The MySQL trigger 'confirm_publisher_order' will detect this 
+    // and automatically add NEW.qty to Books.stock.
+    const [result] = await pool.execute(
+      `UPDATE Publisher_orders 
+       SET status = 'confirmed', confirmed_at = NOW() 
+       WHERE rep_order_id = ? AND status = 'pending'`,
       [repOrderId]
     );
 
-    if (rows.length === 0) {
-      await conn.rollback();
-      return res.status(404).json({ error: "Order not found" });
+    if (result.affectedRows === 0) {
+      return res.status(400).json({ error: "Order not found or already confirmed." });
     }
 
-    const order = rows[0];
-    if (order.status !== "pending") {
-      await conn.rollback();
-      return res.status(400).json({ error: `Order already ${order.status}` });
-    }
-
-    // update status (only once)
-    const [upd] = await conn.execute(
-      `UPDATE Publisher_orders
-       SET status='confirmed', confirmed_at=NOW()
-       WHERE rep_order_id=? AND status='pending'`,
-      [repOrderId]
-    );
-
-    if (upd.affectedRows !== 1) {
-      // someone else confirmed it first
-      await conn.rollback();
-      return res.status(400).json({ error: "Order already confirmed" });
-    }
-
-    // Stock update is handled automatically by the confirm_publisher_order trigger
-    // when status changes to 'confirmed'
-
-    await conn.commit();
-    res.json({ message: "Order confirmed and stock updated" });
-
+    res.json({ message: "Order confirmed! Stock updated automatically via database trigger." });
   } catch (err) {
-    await conn.rollback();
     res.status(500).json({ error: err.message });
-  } finally {
-    conn.release();
   }
 });
 

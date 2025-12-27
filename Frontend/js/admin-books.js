@@ -46,9 +46,6 @@ async function loadBooks() {
           <td>${escapeHtml(String(b.price ?? "—"))}</td>
           <td>${escapeHtml(String(b.stock ?? "—"))}</td>
           <td>${escapeHtml(String(b.threshold ?? "—"))}</td>
-          <td>
-            <button class="btn" onclick="openEdit('${escapeAttr(b.isbn)}')">Edit</button>
-          </td>
         </tr>
       `;
     }
