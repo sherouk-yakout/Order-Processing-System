@@ -33,11 +33,9 @@ router.put('/update/:user_id', async (req, res) => {
   } = req.body;
 
   try {
-    // If username is changed, we update it too (simple approach).
-    // In a full system you'd enforce uniqueness + update foreign keys.
+
     const newUsername = username || user_id;
 
-    // Build query based on whether password is provided
     if (password && String(password).trim().length > 0) {
       // Hash password before storing
       const saltRounds = 10;
