@@ -153,8 +153,14 @@ router.post("/checkout", async (req, res) => {
       ]);
     }
 
-    // Clear cart
+    // Clear cart items
     await conn.execute("DELETE FROM Cart_items WHERE cart_id = ?", [cart_id]);
+
+    // Mark cart as checked out
+    await conn.execute(
+      "UPDATE Carts SET status = 'checked_out' WHERE cart_id = ?",
+      [cart_id]
+    );
 
     await conn.commit();
     res.json({ message: "Checkout successful", order_id });
@@ -175,7 +181,7 @@ router.put("/confirm/:id", async (req, res) => {
     const [result] = await pool.execute(
       `UPDATE publisher_orders
         SET status = 'confirmed',confirmed_at = COALESCE(confirmed_at, NOW())
-        WHERE rep_order_id = ?;
+        WHERE rep_order_id = ?
         AND status = 'pending'`,
       [repOrderId]
     );
