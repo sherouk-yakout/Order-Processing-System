@@ -5,70 +5,106 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Poppins", sans-serif;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 body {
   background: var(--bg);
   color: var(--text);
   transition: 0.3s ease-in-out;
   padding-bottom: 60px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ============================================
-   THEME VARIABLES
+   THEME VARIABLES - Modern Design System
 ============================================ */
 :root {
-  --bg: #ffffff;
-  --card: #f7f7f7;
-  --text: #202020;
-  --accent: #4b7bec;
-  --accent-hover: #3867d6;
-  --danger: #eb3b5a;
-  --success: #20bf6b;
-  --shadow: rgba(0,0,0,0.08);
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --text-secondary: #6c757d;
+  --accent: #667eea;
+  --accent-hover: #5568d3;
+  --accent-light: rgba(102, 126, 234, 0.1);
+  --danger: #ef4444;
+  --danger-light: rgba(239, 68, 68, 0.1);
+  --success: #10b981;
+  --success-light: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --shadow-lg: rgba(0, 0, 0, 0.12);
+  --border: #e5e7eb;
+  --hover: rgba(102, 126, 234, 0.05);
+  --line: #e0e0e0;
 }
 
 body.dark-theme {
-  --bg: #1a1c1f;
-  --card: #2a2d31;
-  --text: #f1f1f1;
-  --accent: #45aaf2;
-  --accent-hover: #2d98da;
-  --shadow: rgba(255,255,255,0.06);
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --accent: #818cf8;
+  --accent-hover: #6366f1;
+  --accent-light: rgba(129, 140, 248, 0.15);
+  --danger: #f87171;
+  --danger-light: rgba(248, 113, 113, 0.15);
+  --success: #34d399;
+  --success-light: rgba(52, 211, 153, 0.15);
+  --warning: #fbbf24;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
+  --border: #334155;
+  --hover: rgba(129, 140, 248, 0.1);
+  --line: #334155;
 }
 
 /* ============================================
-   NAVIGATION
+   NAVIGATION - Modern Design
 ============================================ */
 .navbar {
   display: flex;
   justify-content: space-between;
-  padding: 15px 30px;
+  align-items: center;
+  padding: 16px 32px;
   background: var(--card);
-  box-shadow: 0 3px 10px var(--shadow);
+  box-shadow: 0 1px 3px var(--shadow);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
 
 .navbar .logo {
-  font-size: 1.4rem;
-  font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--accent);
   text-decoration: none;
+  letter-spacing: -0.5px;
+  transition: transform 0.2s;
+}
+
+.navbar .logo:hover {
+  transform: scale(1.05);
 }
 
 .navbar .nav-links {
   list-style: none;
   display: flex;
-  gap: 20px;
+  gap: 24px;
+  align-items: center;
 }
 
 .navbar a {
   text-decoration: none;
   color: var(--text);
-  transition: 0.2s;
+  transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .navbar a:hover {
@@ -76,35 +112,52 @@ body.dark-theme {
 }
 
 /* ============================================
-   BUTTONS
+   BUTTONS - Modern Design
 ============================================ */
 .btn, button {
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  transition: 0.25s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 600;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
 .primary-btn {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .primary-btn:hover {
-  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
 }
 
 .secondary-btn {
   background: var(--card);
-  border: 1px solid var(--accent);
+  border: 2px solid var(--accent);
   color: var(--accent);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .secondary-btn:hover {
   background: var(--accent);
   color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* ============================================
@@ -117,63 +170,87 @@ body.dark-theme {
 }
 
 /* ============================================
-   FORMS
+   FORMS - Modern Design
 ============================================ */
 input, select, textarea {
   width: 100%;
-  padding: 12px;
+  padding: 12px 16px;
   margin: 8px 0 18px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  border-radius: 10px;
+  border: 2px solid var(--border);
   background: var(--card);
   color: var(--text);
   font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
 }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-light);
+  background: var(--card);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
 }
 
 /* ============================================
-   CARDS
+   CARDS - Modern Design
 ============================================ */
 .card {
   background: var(--card);
-  padding: 20px;
-  border-radius: 12px;
+  padding: 24px;
+  border-radius: 16px;
   margin: 15px 0;
-  box-shadow: 0 3px 12px var(--shadow);
-  transition: 0.25s;
+  box-shadow: 0 2px 8px var(--shadow);
+  border: 1px solid var(--border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px var(--shadow);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--shadow-lg);
+  border-color: var(--accent);
 }
 
 /* ============================================
-   TABLES
+   TABLES - Modern Design
 ============================================ */
 .table {
   width: 100%;
   border-collapse: collapse;
   margin: 20px 0;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .table th, .table td {
-  padding: 12px 10px;
-  border-bottom: 1px solid #ddd;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
 }
 
 .table th {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
   color: #fff;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
 }
 
 .table tr:hover {
-  background: rgba(0,0,0,0.04);
+  background: var(--hover);
+  transition: background 0.2s;
 }
 
 /* ============================================

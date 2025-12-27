@@ -7,13 +7,44 @@ router.post("/add", async (req, res) => {
   const { cart_id, isbn, qty, price } = req.body;
 
   try {
+    const requestedQty = qty || 1;
+    
+    // Check if book exists and get current stock
+    const [bookRows] = await pool.execute(
+      'SELECT stock, title FROM Books WHERE isbn = ?',
+      [isbn]
+    );
+    
+    if (bookRows.length === 0) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    
+    const availableStock = bookRows[0].stock;
+    const bookTitle = bookRows[0].title;
+    
+    // Check current quantity in cart if item already exists
+    const [existingItems] = await pool.execute(
+      'SELECT qty FROM Cart_items WHERE cart_id = ? AND isbn = ?',
+      [cart_id, isbn]
+    );
+    
+    const currentCartQty = existingItems.length > 0 ? existingItems[0].qty : 0;
+    const totalRequestedQty = currentCartQty + requestedQty;
+    
+    // Validate stock availability
+    if (totalRequestedQty > availableStock) {
+      return res.status(400).json({ 
+        error: `Insufficient stock for "${bookTitle}". Available: ${availableStock}, Requested: ${totalRequestedQty}` 
+      });
+    }
+    
     await pool.execute(
-      `INSERT INTO cart_items (cart_id, isbn, qty, price)
+      `INSERT INTO Cart_items (cart_id, isbn, qty, price)
        VALUES (?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          qty = qty + VALUES(qty),
          price = VALUES(price)`,
-      [cart_id, isbn, qty || 1, price]
+      [cart_id, isbn, requestedQty, price]
     );
 
     res.json({ message: "Added to cart (qty updated if existed)" });
@@ -21,21 +52,6 @@ router.post("/add", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// Clear cart (for logout)
-router.delete('/clear/:cart_id', async (req, res) => {
-  const { cart_id } = req.params;
-  try {
-    await pool.execute(
-      'DELETE FROM Cart_items WHERE cart_id = ?',
-      [cart_id]
-    );
-    res.json({ message: 'Cart cleared successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 
 // View cart
 router.get('/:cart_id', async (req, res) => {
@@ -81,7 +97,35 @@ router.patch("/qty", async (req, res) => {
 
   try {
     if (delta > 0) {
-      // Increase qty
+      // Increase qty - validate stock availability
+      const [cartItem] = await pool.execute(
+        'SELECT qty FROM Cart_items WHERE cart_id = ? AND isbn = ?',
+        [cart_id, isbn]
+      );
+      
+      if (cartItem.length === 0) {
+        return res.status(404).json({ error: 'Item not found in cart' });
+      }
+      
+      const [bookRows] = await pool.execute(
+        'SELECT stock, title FROM Books WHERE isbn = ?',
+        [isbn]
+      );
+      
+      if (bookRows.length === 0) {
+        return res.status(404).json({ error: 'Book not found' });
+      }
+      
+      const availableStock = bookRows[0].stock;
+      const bookTitle = bookRows[0].title;
+      const newQty = cartItem[0].qty + delta;
+      
+      if (newQty > availableStock) {
+        return res.status(400).json({ 
+          error: `Insufficient stock for "${bookTitle}". Available: ${availableStock}, Requested: ${newQty}` 
+        });
+      }
+      
       await pool.execute(
         `UPDATE Cart_items SET qty = qty + ? WHERE cart_id = ? AND isbn = ?`,
         [delta, cart_id, isbn]

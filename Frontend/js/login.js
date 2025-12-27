@@ -58,15 +58,15 @@ localStorage.removeItem("cart_id");
     localStorage.setItem("username", data.user_id);
     localStorage.setItem("role", role);
 
-    //  IMPORTANT: store NEW cart_id returned from backend
-    if (!data.cart_id) {
-        throw new Error("Login failed: cart not created");
+    //  IMPORTANT: store NEW cart_id returned from backend (only for customers)
+    if (role === "customer" && data.cart_id) {
+      localStorage.setItem("cart_id", data.cart_id);
+    } else if (role === "customer" && !data.cart_id) {
+      throw new Error("Login failed: cart not created for customer");
+    } else if (role === "admin") {
+      // Admins don't need carts, clear any existing cart_id
+      localStorage.removeItem("cart_id");
     }
-
-    if (!localStorage.getItem("cart_id")) {
-  localStorage.setItem("cart_id", data.cart_id);
-}
-
 
     showToast("Login successful ✔️", "success");
 

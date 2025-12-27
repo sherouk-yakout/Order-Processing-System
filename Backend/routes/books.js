@@ -15,6 +15,7 @@ router.get('/', async (req, res) => {
       b.publish_year,
       b.price,
       b.stock,
+      b.threshold,
       p.pub_name AS publisher,
       COALESCE(GROUP_CONCAT(DISTINCT a.author_name ORDER BY a.author_name SEPARATOR ', '), '') AS author
     FROM Books b
@@ -52,7 +53,7 @@ router.get('/', async (req, res) => {
 
   sql += `
     GROUP BY
-      b.isbn, b.title, b.category, b.publish_year, b.price, b.stock, p.pub_name
+      b.isbn, b.title, b.category, b.publish_year, b.price, b.stock, b.threshold, p.pub_name
   `;
 
   if (having.length) {
@@ -114,7 +115,11 @@ router.post('/', async (req, res) => {
     if (pubRows.length > 0) {
       pub_id = pubRows[0].pub_id; // existing publisher
     } else {
-      const [result] = await pool.execute('INSERT INTO Publishers(pub_name) VALUES (?)', [publisher]);
+      const [result] = await pool.execute(
+      'INSERT INTO Publishers(pub_name, pub_address, pub_phone) VALUES (?, ?, ?)',
+      [publisher, 'N/A', '0000000000']
+    );
+
       pub_id = result.insertId;
     }
      const authorNames = authors.split(',').map(a => a.trim()).filter(a => a);
@@ -220,13 +225,8 @@ router.put('/:isbn', async (req, res) => {
       );
     }
 
-    if (oldStock > oldThreshold && stock < oldThreshold) {
-      await pool.execute(
-        `INSERT INTO Publisher_orders (isbn, pub_id, qty, status)
-         VALUES (?, ?, ?, 'pending')`,
-        [isbn, pub_id, REORDER_QTY]
-      );
-    }
+    // Replenishment order creation is handled automatically by the replenish_stock trigger
+    // when stock drops from above threshold to below threshold
 
     res.json({ message: 'Book updated successfully' });
 

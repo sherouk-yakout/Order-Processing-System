@@ -2,6 +2,27 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
+// GET all customer orders (for admin dashboard stats)
+router.get("/all", async (req, res) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT 
+        order_id,
+        customer_username,
+        order_date,
+        total_amount,
+        status
+      FROM Customer_orders
+      WHERE status != 'cancelled'
+      ORDER BY order_date DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
 // GET all publisher orders (for admin) including book title
 router.get("/", async (req, res) => {
   try {
@@ -86,43 +107,63 @@ router.post("/checkout", async (req, res) => {
     return res.status(400).json({ error: "Invalid or expired credit card" });
   }
 
+  const conn = await pool.getConnection();
   try {
+    await conn.beginTransaction();
+
     // Check if cart has items
-    const [items] = await pool.execute(
-      "SELECT * FROM Cart_items WHERE cart_id = ?",
+    const [items] = await conn.execute(
+      "SELECT ci.*, b.stock, b.title FROM Cart_items ci JOIN Books b ON ci.isbn = b.isbn WHERE cart_id = ?",
       [cart_id]
     );
-    if (items.length === 0)
+    if (items.length === 0) {
+      await conn.rollback();
       return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    // Validate stock availability for all items before processing
+    for (const item of items) {
+      if (item.stock < item.qty) {
+        await conn.rollback();
+        return res.status(400).json({ 
+          error: `Insufficient stock for "${item.title}". Available: ${item.stock}, Requested: ${item.qty}` 
+        });
+      }
+    }
 
     // Calculate total
     let total = items.reduce((sum, item) => sum + item.qty * item.price, 0);
 
     // Insert order
-    const [orderResult] = await pool.execute(
+    const [orderResult] = await conn.execute(
       "INSERT INTO Customer_orders(customer_username, total_amount) VALUES (?, ?)",
       [customer_username, total]
     );
     const order_id = orderResult.insertId;
 
-    // Insert order items and update stock
+    // Insert order items and update stock (trigger will prevent negative stock)
     for (const item of items) {
-      await pool.execute(
+      await conn.execute(
         "INSERT INTO Order_items(order_id, isbn, qty, unit_price) VALUES (?, ?, ?, ?)",
         [order_id, item.isbn, item.qty, item.price]
       );
-      await pool.execute("UPDATE Books SET stock = stock - ? WHERE isbn = ?", [
+      // Update stock - trigger will prevent negative values
+      await conn.execute("UPDATE Books SET stock = stock - ? WHERE isbn = ?", [
         item.qty,
         item.isbn,
       ]);
     }
 
     // Clear cart
-    await pool.execute("DELETE FROM Cart_items WHERE cart_id = ?", [cart_id]);
+    await conn.execute("DELETE FROM Cart_items WHERE cart_id = ?", [cart_id]);
 
+    await conn.commit();
     res.json({ message: "Checkout successful", order_id });
   } catch (err) {
+    await conn.rollback();
     res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
   }
 });
 
@@ -168,13 +209,8 @@ router.put("/confirm/:id", async (req, res) => {
       return res.status(400).json({ error: "Order already confirmed" });
     }
 
-    // add qty to stock exactly once
-    await conn.execute(
-      `UPDATE Books
-       SET stock = stock + ?
-       WHERE isbn = ?`,
-      [order.qty, order.isbn]
-    );
+    // Stock update is handled automatically by the confirm_publisher_order trigger
+    // when status changes to 'confirmed'
 
     await conn.commit();
     res.json({ message: "Order confirmed and stock updated" });

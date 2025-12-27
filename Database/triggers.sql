@@ -18,14 +18,23 @@ CREATE TRIGGER replenish_stock
 AFTER UPDATE ON Books
 FOR EACH ROW
 BEGIN
-    IF NEW.stock < NEW.threshold
-       AND OLD.stock >= OLD.threshold THEN
-
-        INSERT INTO Publisher_orders
-        (isbn, pub_id, qty, `status`, created_at)
-        VALUES
-        (NEW.isbn, NEW.pub_id, 50, 'pending', CURRENT_TIMESTAMP);
-
+    DECLARE pending_count INT DEFAULT 0;
+    
+    -- Only trigger when stock drops from above/equal threshold to below threshold
+    IF NEW.stock < NEW.threshold AND OLD.stock >= OLD.threshold THEN
+        -- Check if there's already a pending order for this book to avoid duplicates
+        SELECT COUNT(*) INTO pending_count
+        FROM Publisher_orders
+        WHERE isbn = NEW.isbn 
+          AND status = 'pending';
+        
+        -- Only create order if no pending order exists
+        IF pending_count = 0 THEN
+            INSERT INTO Publisher_orders
+            (isbn, pub_id, qty, `status`, created_at)
+            VALUES
+            (NEW.isbn, NEW.pub_id, 50, 'pending', CURRENT_TIMESTAMP);
+        END IF;
     END IF;
 END$$
 

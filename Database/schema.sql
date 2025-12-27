@@ -22,7 +22,7 @@ CREATE TABLE Authors(
     author_id INT AUTO_INCREMENT PRIMARY KEY,
     author_name VARCHAR(100) NOT NULL
 );
-CREATE TABLE Book_authors( --a book can have one or more authors
+CREATE TABLE Book_authors(
     isbn VARCHAR(13),
     author_id INT,
     PRIMARY KEY (isbn, author_id),

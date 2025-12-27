@@ -96,7 +96,7 @@ async function searchBooks() {
   for (const book of filtered) {
     const stock = Number(book.stock || 0);
     const stockClass = stock > 0 ? "stock-ok" : "stock-out";
-    const stockText = stock > 0 ? "In Stock" : "Out of Stock";
+    const stockText = stock > 0 ? `In Stock (${stock} available)` : "Out of Stock";
 
     const imageUrl = await getBookImage(book.isbn);
     const year = book.publish_year ?? "—";
@@ -115,7 +115,7 @@ async function searchBooks() {
           <p><strong>Category:</strong> ${book.category || "—"}</p>
           <p><strong>ISBN:</strong> ${book.isbn || "—"}</p>
           <p><strong>Price:</strong> $${price}</p>
-          <p class="${stockClass}">${stockText}</p>
+          <p class="${stockClass}"><strong>Stock:</strong> ${stockText}</p>
 
           <button class="primary-btn"
             onclick="addToCart('${book.isbn}', ${price})"
