@@ -72,17 +72,16 @@ function isValidCreditCard(number) {
 
 // Helper function for expiry date validation (format MM/YY)
 function isValidExpiry(expiry) {
-    if (!expiry) return false;
+  if (!expiry) return false;
 
-    const [month, year] = expiry.split('/').map(Number);
-    if (!month || !year || month < 1 || month > 12) return false;
+  const [month, year] = expiry.split("/").map(Number);
+  if (!month || !year || month < 1 || month > 12) return false;
 
-    const now = new Date();
-    const expiryDate = new Date(2000 + year, month, 0); // LAST day of month
+  const now = new Date();
+  const expiryDate = new Date(2000 + year, month, 0); // LAST day of month
 
-    return expiryDate >= now;
+  return expiryDate >= now;
 }
-
 
 // Customer checkout
 router.post("/checkout", async (req, res) => {
@@ -97,10 +96,10 @@ router.post("/checkout", async (req, res) => {
   }
 
   if (!isValidCreditCard(credit_card_number)) {
-   return res.status(400).json({
-  error: "Invalid credit card number. Use a valid test card like 4242 4242 4242 4242"
-});
-
+    return res.status(400).json({
+      error:
+        "Invalid credit card number. Use a valid test card like 4242 4242 4242 4242",
+    });
   }
 
   if (!isValidExpiry(credit_card_expiry)) {
@@ -125,8 +124,8 @@ router.post("/checkout", async (req, res) => {
     for (const item of items) {
       if (item.stock < item.qty) {
         await conn.rollback();
-        return res.status(400).json({ 
-          error: `Insufficient stock for "${item.title}". Available: ${item.stock}, Requested: ${item.qty}` 
+        return res.status(400).json({
+          error: `Insufficient stock for "${item.title}". Available: ${item.stock}, Requested: ${item.qty}`,
         });
       }
     }
@@ -174,14 +173,17 @@ router.put("/confirm/:id", async (req, res) => {
   try {
     // Only update if currently 'pending'
     const [result] = await pool.execute(
-      `UPDATE Publisher_orders 
-       SET status = 'confirmed', confirmed_at = NOW() 
-       WHERE rep_order_id = ? AND status = 'pending'`,
+      `UPDATE publisher_orders
+        SET status = 'confirmed',confirmed_at = COALESCE(confirmed_at, NOW())
+        WHERE rep_order_id = ?;
+        AND status = 'pending'`,
       [repOrderId]
     );
 
     if (result.affectedRows === 0) {
-      return res.status(400).json({ error: "Order already confirmed or not found." });
+      return res
+        .status(400)
+        .json({ error: "Order already confirmed or not found." });
     }
 
     res.json({ message: "Stock updated successfully!" });
@@ -191,7 +193,7 @@ router.put("/confirm/:id", async (req, res) => {
 });
 
 // View past orders for a customer
-router.get('/user/:customer_username', async (req, res) => {
+router.get("/user/:customer_username", async (req, res) => {
   const { customer_username } = req.params;
 
   try {
@@ -220,7 +222,7 @@ router.get('/user/:customer_username', async (req, res) => {
           id: row.order_id,
           created_at: row.order_date,
           total: row.total_amount,
-          items: []
+          items: [],
         };
       }
 
@@ -228,7 +230,7 @@ router.get('/user/:customer_username', async (req, res) => {
         isbn: row.isbn,
         title: row.title,
         quantity: row.qty,
-        price: row.unit_price
+        price: row.unit_price,
       });
     }
 
